@@ -1,6 +1,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Essential permissions for alarm functionality -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
+    <!-- Full-screen alarm permissions (only when needed) -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.SHOW_WHEN_LOCKED" />
+    <uses-permission android:name="android.permission.TURN_SCREEN_ON" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
     <application
       android:name=".MainApplication"
@@ -20,6 +33,53 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data
+                android:scheme="com.alarmapp"
+                android:host="auth"
+                android:pathPrefix="/callback" />
+        </intent-filter>
       </activity>
+      
+      <!-- Alarm Activity for full-screen alarm display -->
+      <activity
+        android:name=".AlarmActivity"
+        android:label="Alarm"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:launchMode="singleTask"
+        android:excludeFromRecents="true"
+        android:exported="true"
+        android:screenOrientation="portrait"
+        android:showWhenLocked="true"
+        android:turnScreenOn="true">
+        <intent-filter>
+          <action android:name="android.intent.action.VIEW" />
+          <category android:name="android.intent.category.DEFAULT" />
+          <data android:scheme="alarm" />
+        </intent-filter>
+      </activity>
+      
+      <!-- Boot receiver for automatic alarm rescheduling -->
+      <receiver
+        android:name=".BootReceiver"
+        android:enabled="true"
+        android:exported="false">
+        <intent-filter>
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+          <action android:name="android.intent.action.PACKAGE_REPLACED" />
+          <data android:scheme="package" />
+        </intent-filter>
+      </receiver>
+      
+      <!-- Service for rescheduling alarms -->
+      <service
+        android:name=".AlarmRescheduleService"
+        android:enabled="true"
+        android:exported="false" />
+      
     </application>
 </manifest>
