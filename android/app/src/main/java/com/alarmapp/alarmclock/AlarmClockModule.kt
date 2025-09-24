@@ -59,6 +59,17 @@ class AlarmClockModule(private val ctx: ReactApplicationContext) : ReactContextB
       promise.reject("CANCEL_ERROR", e)
     }
   }
+
+  @ReactMethod
+  fun stopRinging(promise: Promise) {
+    try {
+      val intent = Intent(ctx, AlarmClockService::class.java).apply { action = "STOP" }
+      ctx.startService(intent)
+      promise.resolve(true)
+    } catch (e: Exception) {
+      promise.reject("STOP_ERROR", e)
+    }
+  }
 }
 
 

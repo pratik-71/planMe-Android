@@ -1,17 +1,31 @@
 /**
  * App entry - renders simple Navigator for Home/Schedule/View with authentication
  */
-import React from 'react';
+import React, {useEffect} from 'react';
 import {StatusBar, useColorScheme} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AuthGuard from './components/AuthGuard';
 import Navigator from './navigation';
 
-function App(props: any) {
+function App() {
   const isDarkMode = useColorScheme() === 'dark';
-  const initialAlarm = props?.slotId
-    ? {slotId: props.slotId as string, slotTitle: (props.slotTitle as string) || 'Alarm'}
-    : undefined;
+  // Do not auto-navigate to Alarm screen on cold start
+  const initialAlarm = undefined as unknown as
+    | {slotId: string; slotTitle: string}
+    | undefined;
+
+  // Stop any ringing when app opens
+  useEffect(() => {
+    try {
+      const {NativeModules, Platform} = require('react-native');
+      if (
+        Platform.OS === 'android' &&
+        NativeModules?.AlarmClockModule?.stopRinging
+      ) {
+        NativeModules.AlarmClockModule.stopRinging();
+      }
+    } catch {}
+  }, []);
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />

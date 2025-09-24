@@ -102,17 +102,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 type NavigatorProps = {initialAlarm?: {slotId: string; slotTitle: string}};
 
 const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
-  const [route, setRoute] = useState<Route>(
-    initialAlarm
-      ? {
-          name: 'Alarm',
-          params: {
-            slotId: initialAlarm.slotId,
-            slotTitle: initialAlarm.slotTitle,
-          },
-        }
-      : {name: 'Home'},
-  );
+  // Always start at Home; do not auto-open Alarm on launch
+  const [route, setRoute] = useState<Route>({name: 'Home'});
   const [showSidebar, setShowSidebar] = useState(false);
   const [backendUser, setBackendUser] = useState<any>(null);
   const [isLoadingBackend, setIsLoadingBackend] = useState(true);
