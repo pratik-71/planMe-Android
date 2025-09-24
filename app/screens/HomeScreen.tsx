@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import {initialize, schedule} from '../../services/AlarmScheduler';
 import {theme} from '../../stores/ThemeStore';
 
 interface Props {
@@ -47,6 +48,30 @@ export default function HomeScreen({onScheduleDay, onViewDay}: Props) {
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 0}}>
                 <Text style={styles.secondaryButtonText}>View day</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.testButton}
+              onPress={async () => {
+                try {
+                  await initialize();
+                  const in30Sec = new Date(Date.now() + 30 * 1000);
+                  await schedule({
+                    id: `test_${Date.now()}`,
+                    title: 'Test Alarm (30s)',
+                    dateTime: in30Sec,
+                  });
+                  Alert.alert('Scheduled', 'Test alarm set for 30 seconds from now.');
+                } catch (e) {
+                  Alert.alert('Schedule failed', 'Could not schedule the alarm.');
+                }
+              }}>
+              <LinearGradient
+                colors={[theme.surfaceVariant, theme.surface]}
+                style={styles.testButtonGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}>
+                <Text style={styles.testButtonText}>Test 30s Alarm</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -157,6 +182,27 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.2)',
     textShadowOffset: {width: 0, height: 1},
     textShadowRadius: 2,
+  },
+  testButton: {
+    borderRadius: 16,
+    marginTop: 16,
+    shadowColor: theme.shadow,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  testButtonGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  testButtonText: {
+    color: theme.textPrimary,
+    fontSize: 14,
+    fontWeight: '700',
   },
   footer: {
     position: 'absolute',

@@ -99,8 +99,20 @@ const Sidebar: React.FC<SidebarProps> = ({
   );
 };
 
-const Navigator: React.FC = () => {
-  const [route, setRoute] = useState<Route>({name: 'Home'});
+type NavigatorProps = {initialAlarm?: {slotId: string; slotTitle: string}};
+
+const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
+  const [route, setRoute] = useState<Route>(
+    initialAlarm
+      ? {
+          name: 'Alarm',
+          params: {
+            slotId: initialAlarm.slotId,
+            slotTitle: initialAlarm.slotTitle,
+          },
+        }
+      : {name: 'Home'},
+  );
   const [showSidebar, setShowSidebar] = useState(false);
   const [backendUser, setBackendUser] = useState<any>(null);
   const [isLoadingBackend, setIsLoadingBackend] = useState(true);
@@ -179,11 +191,11 @@ const Navigator: React.FC = () => {
           setShowSidebar={setShowSidebar}
           backendUser={backendUser}
           user={user}>
-      <ScheduleDayScreen
-        dateISO={route.params.dateISO}
-        onDone={() => setRoute({name: 'Home'})}
-      />
-        </MainLayout>
+        <ScheduleDayScreen
+          dateISO={route.params.dateISO}
+          onDone={() => setRoute({name: 'Home'})}
+        />
+          </MainLayout>
         <Sidebar
           showSidebar={showSidebar}
           setShowSidebar={setShowSidebar}

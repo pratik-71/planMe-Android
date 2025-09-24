@@ -7,13 +7,16 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AuthGuard from './components/AuthGuard';
 import Navigator from './navigation';
 
-function App() {
+function App(props: any) {
   const isDarkMode = useColorScheme() === 'dark';
+  const initialAlarm = props?.slotId
+    ? {slotId: props.slotId as string, slotTitle: (props.slotTitle as string) || 'Alarm'}
+    : undefined;
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <AuthGuard>
-        <Navigator />
+        <Navigator initialAlarm={initialAlarm} />
       </AuthGuard>
     </SafeAreaProvider>
   );

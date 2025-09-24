@@ -44,6 +44,16 @@
         </intent-filter>
       </activity>
       
+      <!-- AlarmClock flow components -->
+      <receiver
+        android:name=".alarmclock.AlarmClockReceiver"
+        android:exported="true" />
+
+      <service
+        android:name=".alarmclock.AlarmClockService"
+        android:exported="false"
+        android:foregroundServiceType="mediaPlayback" />
+
       <!-- Alarm Activity for full-screen alarm display -->
       <activity
         android:name=".AlarmActivity"

@@ -137,6 +137,49 @@ export async function schedule(alarm: AlarmPayload) {
       }
     }
 
+    // Try native AlarmClock module first
+    try {
+      const {NativeModules} = require('react-native');
+      const m = NativeModules?.AlarmClockModule;
+      if (m?.schedule) {
+        await m.schedule(alarm.id, alarm.title, alarm.dateTime.getTime());
+        // Also post a silent visual notification at the same time as a UI fallback
+        const triggerSilent: TimestampTrigger = {
+          type: TriggerType.TIMESTAMP,
+          timestamp: alarm.dateTime.getTime(),
+          alarmManager: {allowWhileIdle: true},
+        };
+        await notifee.createTriggerNotification(
+          {
+            id: `alarm_vis_${alarm.id}`,
+            title: 'Alarm',
+            body: alarm.title,
+            data: {reminderId: alarm.id, slotTitle: alarm.title},
+            android: {
+              channelId: 'alarm-channel',
+              category: AndroidCategory.ALARM,
+              importance: AndroidImportance.HIGH,
+              // no sound/vibration; the service provides the tone
+              pressAction: {
+                id: 'open_alarm',
+                launchActivity: 'com.alarmapp.AlarmActivity',
+              },
+              fullScreenAction: {
+                id: 'open_alarm',
+                launchActivity: 'com.alarmapp.AlarmActivity',
+              },
+              autoCancel: false,
+              showTimestamp: true,
+              ongoing: true,
+              visibility: 1,
+            },
+          },
+          triggerSilent,
+        );
+        return;
+      }
+    } catch {}
+
     const trigger: TimestampTrigger = {
       type: TriggerType.TIMESTAMP,
       timestamp: alarm.dateTime.getTime(),
