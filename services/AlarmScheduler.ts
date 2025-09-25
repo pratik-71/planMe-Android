@@ -56,52 +56,32 @@ export async function initializeAdvancedFeatures() {
   try {
     // Set up foreground event handler with comprehensive error handling
     unsubscribeForeground = notifee.onForegroundEvent(
-      async ({type, detail}) => {
+      async ({type}) => {
         try {
-          if (
-            type === EventType.PRESS ||
-            type === EventType.ACTION_PRESS ||
-            type === EventType.DELIVERED
-          ) {
-            const notificationData = detail.notification?.data as any;
-            if (notificationData?.reminderId && notificationData?.slotTitle) {
-              // Add delay to ensure app is fully loaded
-              setTimeout(() => {
-                try {
-                  const NavigationService = require('./NavigationService');
-                  NavigationService.navigateToAlarm(
-                    notificationData.slotTitle,
-                    notificationData.reminderId,
-                  );
-                } catch (navError) {
-                  // Silent fail - navigation not ready
-                }
-              }, 500);
-            }
+          if (type === EventType.PRESS || type === EventType.ACTION_PRESS) {
+            setTimeout(() => {
+              try {
+                const NavigationService = require('./NavigationService');
+                NavigationService.navigateToViewDay();
+              } catch {}
+            }, 200);
           }
-        } catch (error) {
-          // Silent fail - don't crash app
-        }
+        } catch {}
       },
     );
 
     // Handle initial notification with error handling
     try {
       const initial = await notifee.getInitialNotification();
-      const data = initial?.notification?.data as any;
-      if (data?.reminderId && data?.slotTitle) {
+      if (initial) {
         setTimeout(() => {
           try {
             const NavigationService = require('./NavigationService');
-            NavigationService.navigateToAlarm(data.slotTitle, data.reminderId);
-          } catch (error) {
-            // Silent fail - navigation not ready
-          }
-        }, 2000);
+            NavigationService.navigateToViewDay();
+          } catch {}
+        }, 800);
       }
-    } catch (initError) {
-      // Silent fail - initial notification check failed
-    }
+    } catch {}
 
     // Reschedule alarms with error handling
     try {
@@ -162,11 +142,11 @@ export async function schedule(alarm: AlarmPayload) {
               // no sound/vibration; the service provides the tone
               pressAction: {
                 id: 'open_alarm',
-                launchActivity: 'com.alarmapp.AlarmActivity',
+                launchActivity: 'com.alarmapp.MainActivity',
               },
               fullScreenAction: {
                 id: 'open_alarm',
-                launchActivity: 'com.alarmapp.AlarmActivity',
+                launchActivity: 'com.alarmapp.MainActivity',
               },
               autoCancel: false,
               showTimestamp: true,

@@ -3,6 +3,7 @@
  */
 import React, {useEffect} from 'react';
 import {StatusBar, useColorScheme} from 'react-native';
+import './services/BackgroundHandler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AuthGuard from './components/AuthGuard';
 import Navigator from './navigation';
