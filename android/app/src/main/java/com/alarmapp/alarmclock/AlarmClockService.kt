@@ -16,6 +16,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
+import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
 import com.alarmapp.AlarmActivity
 import com.alarmapp.R
@@ -24,7 +25,7 @@ import android.os.Handler
 import android.os.Looper
 
 class AlarmClockService : Service() {
-  private val channelId = "alarm-channel"
+  private val channelId = "alarm-silent"
   private var mediaPlayer: MediaPlayer? = null
   private var audioManager: AudioManager? = null
   private var focusRequest: AudioFocusRequest? = null
@@ -47,13 +48,12 @@ class AlarmClockService : Service() {
 
     ensureChannel()
 
-    val activityIntent = Intent(this, AlarmActivity::class.java).apply {
+    // Intent for opening app (MainActivity) when user taps the notification
+    val openAppIntent = Intent(this, com.alarmapp.MainActivity::class.java).apply {
       addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-      putExtra("slotTitle", title)
-      putExtra("slotId", id)
     }
-    val fullPending = PendingIntent.getActivity(
-      this, 0, activityIntent,
+    val contentPending = PendingIntent.getActivity(
+      this, 0, openAppIntent,
       PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
     )
 
@@ -72,12 +72,17 @@ class AlarmClockService : Service() {
       .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
       .setOngoing(true)
       .setAutoCancel(false)
-      .setFullScreenIntent(fullPending, true)
+      // Do not launch full-screen when device is locked; user will tap notification
+      .setContentIntent(contentPending)
       .addAction(R.mipmap.ic_launcher, "Stop", stopPending)
       .build()
 
     try {
-      startForeground(1201, notif)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        startForeground(1201, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+      } else {
+        startForeground(1201, notif)
+      }
     } catch (_: Exception) { /* ignore */ }
 
     // Acquire a short wake lock to help turn on screen for older devices
@@ -92,11 +97,13 @@ class AlarmClockService : Service() {
       wakeLock = wl
     } catch (_: Exception) {}
 
-    // Try launching activity immediately and again after a short delay
-    try { startActivity(activityIntent) } catch (_: Exception) {}
-    Handler(Looper.getMainLooper()).postDelayed({
-      try { startActivity(activityIntent) } catch (_: Exception) {}
-    }, 800)
+    // Do not auto-launch any activity. Let the notification + ringtone bring attention
+    // Acquire partial wakelock to keep CPU on while screen may be off
+    try {
+      val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+      val wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "AlarmApp:AlarmCpuLock")
+      wl.acquire(60000)
+    } catch (_: Exception) {}
 
     startRinging()
     return START_NOT_STICKY
@@ -105,11 +112,11 @@ class AlarmClockService : Service() {
   private fun ensureChannel() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-      val channel = NotificationChannel(channelId, "Alarms", NotificationManager.IMPORTANCE_HIGH).apply {
-        description = "Alarm notifications"
-        enableVibration(true)
-        enableLights(true)
-        lightColor = Color.RED
+      val channel = NotificationChannel(channelId, "Alarms (Silent)", NotificationManager.IMPORTANCE_HIGH).apply {
+        description = "Silent alarm visual notifications"
+        setSound(null, null)
+        enableVibration(false)
+        enableLights(false)
         setBypassDnd(true)
         lockscreenVisibility = Notification.VISIBILITY_PUBLIC
       }
@@ -134,6 +141,20 @@ class AlarmClockService : Service() {
         @Suppress("DEPRECATION")
         audioManager?.requestAudioFocus(null, AudioManager.STREAM_ALARM, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
       }
+
+      // Ensure alarm stream is audible when device is locked
+      try {
+        val current = audioManager?.getStreamVolume(AudioManager.STREAM_ALARM) ?: 0
+        if (current == 0) {
+          val max = audioManager?.getStreamMaxVolume(AudioManager.STREAM_ALARM) ?: 7
+          @Suppress("DEPRECATION")
+          audioManager?.setStreamVolume(
+            AudioManager.STREAM_ALARM,
+            (max * 0.7).toInt().coerceAtLeast(1),
+            0,
+          )
+        }
+      } catch (_: Exception) {}
       val alarmUri: Uri =
         RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
           ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
@@ -141,8 +162,11 @@ class AlarmClockService : Service() {
       mediaPlayer = MediaPlayer().apply {
         setAudioAttributes(attrs)
         setDataSource(this@AlarmClockService, alarmUri)
+        setWakeMode(this@AlarmClockService, PowerManager.PARTIAL_WAKE_LOCK)
         isLooping = true
         prepare()
+        try { audioManager?.mode = AudioManager.MODE_NORMAL } catch (_: Exception) {}
+        try { setVolume(1.0f, 1.0f) } catch (_: Exception) {}
         start()
       }
     } catch (_: Exception) {}

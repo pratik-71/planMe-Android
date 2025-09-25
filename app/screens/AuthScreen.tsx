@@ -149,19 +149,13 @@ export default function AuthScreen({onAuthSuccess}: AuthScreenProps) {
     setStatusMsg('Creating account...');
 
     try {
-      console.log('Creating user with:', {
-        id: pendingUser.id,
-        email: pendingUser.email,
-        username: username.trim(),
-      });
-
-      const result = await BackendService.createUser(
+      await BackendService.createUser(
         pendingUser.id,
         pendingUser.email,
         username.trim(),
       );
 
-      console.log('Backend response:', result);
+      // account created
 
       setStatusMsg('Account created successfully!');
 
@@ -182,7 +176,7 @@ export default function AuthScreen({onAuthSuccess}: AuthScreenProps) {
 
       // Small delay to ensure state update is processed
       setTimeout(() => {
-      onAuthSuccess();
+        onAuthSuccess();
       }, 100);
     } catch (e: any) {
       console.error('Account creation error:', e);
@@ -250,24 +244,24 @@ export default function AuthScreen({onAuthSuccess}: AuthScreenProps) {
       <View style={styles.center}>
         <Text style={styles.title}>Welcome</Text>
         <Text style={styles.subtitle}>Sign in with Google to continue</Text>
-          <TouchableOpacity
+        <TouchableOpacity
           style={styles.primaryButton}
-            onPress={handleGoogleSignIn}
-            disabled={isLoading}>
-            <LinearGradient
+          onPress={handleGoogleSignIn}
+          disabled={isLoading}>
+          <LinearGradient
             colors={[theme.primary, theme.accent]}
             style={styles.primaryButtonGradient}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}>
-              {isLoading ? (
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 0}}>
+            {isLoading ? (
               <ActivityIndicator color={theme.textInverse} />
             ) : (
               <Text style={styles.primaryText}>Continue with Google</Text>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
         {statusMsg ? <Text style={styles.hint}>{statusMsg}</Text> : null}
-        </View>
+      </View>
       <LoaderOverlay visible={isLoading} message={statusMsg} />
     </LinearGradient>
   );

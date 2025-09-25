@@ -19,13 +19,13 @@ export async function initialize(_onOpenAlarm?: (reminderId: string) => void) {
   if (initialized) return;
 
   try {
-    // Create notification channel
+    // Create a SILENT visual-only channel for notifications
     await notifee.createChannel({
-      id: 'alarm-channel',
-      name: 'Alarms',
-      sound: 'default',
+      id: 'alarm-silent',
+      name: 'Alarms (Silent)',
       importance: AndroidImportance.HIGH,
-      vibration: true,
+      vibration: false,
+      lights: false,
     });
 
     // Request notification permissions when user enters home page
@@ -56,9 +56,15 @@ export async function initializeAdvancedFeatures() {
   try {
     // Set up foreground event handler with comprehensive error handling
     unsubscribeForeground = notifee.onForegroundEvent(
-      async ({type}) => {
+      async ({type, detail}) => {
         try {
           if (type === EventType.PRESS || type === EventType.ACTION_PRESS) {
+            try {
+              const nid = detail?.notification?.id;
+              if (nid) {
+                await notifee.cancelDisplayedNotification(nid);
+              }
+            } catch {}
             setTimeout(() => {
               try {
                 const NavigationService = require('./NavigationService');
@@ -134,12 +140,16 @@ export async function schedule(alarm: AlarmPayload) {
             id: `alarm_vis_${alarm.id}`,
             title: 'Alarm',
             body: alarm.title,
-            data: {reminderId: alarm.id, slotTitle: alarm.title},
+            data: {
+              reminderId: alarm.id,
+              slotTitle: alarm.title,
+              navigateTo: 'ViewDay',
+            },
             android: {
-              channelId: 'alarm-channel',
+              channelId: 'alarm-silent',
               category: AndroidCategory.ALARM,
               importance: AndroidImportance.HIGH,
-              // no sound/vibration; the service provides the tone
+              // silent visual only; ForegroundService provides the tone
               pressAction: {
                 id: 'open_alarm',
                 launchActivity: 'com.alarmapp.MainActivity',
@@ -148,9 +158,9 @@ export async function schedule(alarm: AlarmPayload) {
                 id: 'open_alarm',
                 launchActivity: 'com.alarmapp.MainActivity',
               },
-              autoCancel: false,
+              autoCancel: true,
               showTimestamp: true,
-              ongoing: true,
+              ongoing: false,
               visibility: 1,
             },
           },
@@ -173,9 +183,13 @@ export async function schedule(alarm: AlarmPayload) {
         id: `alarm_${alarm.id}`,
         title: '🚨 ALARM',
         body: alarm.title,
-        data: {reminderId: alarm.id, slotTitle: alarm.title},
+        data: {
+          reminderId: alarm.id,
+          slotTitle: alarm.title,
+          navigateTo: 'ViewDay',
+        },
         android: {
-          channelId: 'alarm-channel',
+          channelId: 'alarm-silent',
           category: AndroidCategory.ALARM,
           importance: AndroidImportance.HIGH,
           sound: 'default',
@@ -185,14 +199,11 @@ export async function schedule(alarm: AlarmPayload) {
             id: 'open_alarm',
             launchActivity: 'com.alarmapp.MainActivity',
           },
-          fullScreenAction: {
-            id: 'open_alarm',
-            launchActivity: 'com.alarmapp.MainActivity',
-          },
-          autoCancel: false, // Don't auto-cancel, user must interact
+          // No fullScreenAction so it doesn't pop UI over lock screen
+          autoCancel: true, // Auto-remove on tap
           // Ensure notification shows even when device is locked
           showTimestamp: true,
-          ongoing: true, // Make it ongoing so it can't be dismissed
+          ongoing: false, // Allow removal on tap
           // Additional settings for full-screen alarm
           visibility: 1, // AndroidVisibility.PUBLIC
         },
