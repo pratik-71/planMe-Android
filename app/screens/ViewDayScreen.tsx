@@ -125,16 +125,16 @@ export default function ViewDayScreen({
           return {
             ...plan,
             slots: plan.slots.map(s =>
-        s.id === slotId
-          ? {
-              ...s,
-              subgoals: s.subgoals.map(g =>
-                g.id === subgoalId ? {...g, completed: !g.completed} : g,
-              ),
-            }
-          : s,
-      ),
-    };
+              s.id === slotId
+                ? {
+                    ...s,
+                    subgoals: s.subgoals.map(g =>
+                      g.id === subgoalId ? {...g, completed: !g.completed} : g,
+                    ),
+                  }
+                : s,
+            ),
+          };
         }
         return plan;
       });
@@ -240,23 +240,23 @@ export default function ViewDayScreen({
                         start={{x: 0, y: 0}}
                         end={{x: 1, y: 1}}>
                         <View style={styles.slotHeader}>
-              <Text style={styles.slotTitle}>{item.title}</Text>
+                          <Text style={styles.slotTitle}>{item.title}</Text>
                           <View style={styles.timeBadge}>
                             <Text style={styles.timeText}>
-                {new Date(item.startISO).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </Text>
+                              {new Date(item.startISO).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </Text>
                           </View>
                         </View>
 
                         {item.subgoals.length > 0 && (
-              <View style={styles.subgoalsContainer}>
+                          <View style={styles.subgoalsContainer}>
                             <Text style={styles.subgoalsTitle}>Subgoals</Text>
-                {item.subgoals.map(sg => (
+                            {item.subgoals.map(sg => (
                               <View key={sg.id} style={styles.subgoalRow}>
-                  <TouchableOpacity
+                                <TouchableOpacity
                                   style={[
                                     styles.subgoalContent,
                                     !isToday && styles.subgoalContentDisabled,
@@ -279,14 +279,14 @@ export default function ViewDayScreen({
                                     </View>
                                   </View>
                                   <View style={styles.subgoalTextContainer}>
-                    <Text
-                      style={[
-                        styles.subgoalText,
+                                    <Text
+                                      style={[
+                                        styles.subgoalText,
                                         sg.completed && styles.completedText,
                                         !isToday && styles.subgoalTextDisabled,
-                      ]}>
-                      {sg.text}
-                    </Text>
+                                      ]}>
+                                      {sg.text}
+                                    </Text>
                                     <Text
                                       style={[
                                         styles.subgoalPriority,
@@ -296,19 +296,19 @@ export default function ViewDayScreen({
                                       {sg.priority || 'Medium'}
                                     </Text>
                                   </View>
-                  </TouchableOpacity>
+                                </TouchableOpacity>
                               </View>
                             ))}
                           </View>
                         )}
                       </LinearGradient>
-                ))}
+                    ))}
                   </View>
                 )}
-            </View>
-          ))}
-        </View>
-      ) : (
+              </View>
+            ))}
+          </View>
+        ) : (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>📅</Text>
             <Text style={styles.emptyTitle}>No plans for {currentDateISO}</Text>
@@ -316,8 +316,8 @@ export default function ViewDayScreen({
               Create your first plan to get started
             </Text>
           </View>
-      )}
-    </ScrollView>
+        )}
+      </ScrollView>
     </LinearGradient>
   );
 }

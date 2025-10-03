@@ -15,6 +15,7 @@ import ScheduleDayScreen from '../app/screens/ScheduleDayScreen';
 import ViewDayScreen from '../app/screens/ViewDayScreen';
 import AlarmScreen from '../app/screens/AlarmScreen';
 import WaterBreaksScreen from '../app/screens/WaterBreaksScreen';
+import PermissionsScreen from '../app/screens/PermissionsScreen';
 import MainLayout from '../components/MainLayout';
 import {theme} from '../stores/ThemeStore';
 
@@ -23,7 +24,8 @@ export type Route =
   | {name: 'ScheduleDay'; params: {dateISO: string}}
   | {name: 'ViewDay'; params: {dateISO: string}}
   | {name: 'Alarm'; params: {slotTitle: string; slotId: string}}
-  | {name: 'WaterBreaks'};
+  | {name: 'WaterBreaks'}
+  | {name: 'Permissions'};
 
 interface SidebarProps {
   showSidebar: boolean;
@@ -103,15 +105,30 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 type NavigatorProps = {initialAlarm?: {slotId: string; slotTitle: string}};
 
-const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
-  // Always start at Home; do not auto-open Alarm on launch
-  const [route, setRoute] = useState<Route>({name: 'Home'});
+const Navigator: React.FC<NavigatorProps> = ({initialAlarm: _initialAlarm}) => {
+  // Check if user needs permissions screen (first time)
+  const [_hasSeenPermissions, setHasSeenPermissions] = useState(false);
+  const [route, setRoute] = useState<Route>({name: 'Permissions'});
   const [showSidebar, setShowSidebar] = useState(false);
   const [backendUser, setBackendUser] = useState<any>(null);
   const [isLoadingBackend, setIsLoadingBackend] = useState(true);
   const user = useAuthStore(s => s.user);
   const signOut = useAuthStore(s => s.signOut);
   const todayISO = new Date().toISOString().slice(0, 10);
+
+  // Check if user has already seen permissions on app start
+  useEffect(() => {
+    const checkPermissionsStatus = async () => {
+      const AsyncStorage =
+        require('@react-native-async-storage/async-storage').default;
+      const seen = await AsyncStorage.getItem('@planme_permissions_seen');
+      if (seen === 'true') {
+        setHasSeenPermissions(true);
+        setRoute({name: 'Home'});
+      }
+    };
+    checkPermissionsStatus();
+  }, []);
 
   // Set up navigation reference for NavigationService
   useEffect(() => {
@@ -186,11 +203,11 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
           setShowSidebar={setShowSidebar}
           backendUser={backendUser}
           user={user}>
-        <ScheduleDayScreen
-          dateISO={route.params.dateISO}
-          onDone={() => setRoute({name: 'Home'})}
-        />
-          </MainLayout>
+          <ScheduleDayScreen
+            dateISO={route.params.dateISO}
+            onDone={() => setRoute({name: 'Home'})}
+          />
+        </MainLayout>
         <Sidebar
           showSidebar={showSidebar}
           setShowSidebar={setShowSidebar}
@@ -226,6 +243,20 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
       </View>
     );
   }
+  if (route.name === 'Permissions') {
+    return (
+      <PermissionsScreen
+        onComplete={async () => {
+          const AsyncStorage =
+            require('@react-native-async-storage/async-storage').default;
+          await AsyncStorage.setItem('@planme_permissions_seen', 'true');
+          setHasSeenPermissions(true);
+          setRoute({name: 'Home'});
+        }}
+      />
+    );
+  }
+
   if (route.name === 'WaterBreaks') {
     return (
       <View style={styles.container}>
@@ -289,10 +320,10 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
         setShowSidebar={setShowSidebar}
         backendUser={backendUser}
         user={user}>
-    <HomeScreen
-      onScheduleDay={() =>
-        setRoute({name: 'ScheduleDay', params: {dateISO: todayISO}})
-      }
+        <HomeScreen
+          onScheduleDay={() =>
+            setRoute({name: 'ScheduleDay', params: {dateISO: todayISO}})
+          }
           onViewDay={() =>
             setRoute({name: 'ViewDay', params: {dateISO: todayISO}})
           }

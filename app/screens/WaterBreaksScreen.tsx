@@ -112,7 +112,9 @@ export default function WaterBreaksScreen({onBack}: Props) {
 
       let scheduled = 0;
       for (let i = 0; i < numNotifications; i++) {
-        const notifTime = new Date(wakeDate.getTime() + i * interval * 60 * 1000);
+        const notifTime = new Date(
+          wakeDate.getTime() + i * interval * 60 * 1000,
+        );
 
         // Skip if in meal windows
         if (
@@ -136,16 +138,10 @@ export default function WaterBreaksScreen({onBack}: Props) {
         scheduled++;
       }
 
-      Alert.alert(
-        'Success',
-        `Scheduled ${scheduled} water reminders!`,
-      );
+      Alert.alert('Success', `Scheduled ${scheduled} water reminders!`);
       onBack();
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'Failed to schedule water reminders.',
-      );
+      Alert.alert('Error', 'Failed to schedule water reminders.');
     }
   };
 
@@ -239,10 +235,7 @@ export default function WaterBreaksScreen({onBack}: Props) {
             <Text style={styles.sectionTitle}>Reminder Amount</Text>
             <View style={styles.tabContainer}>
               <TouchableOpacity
-                style={[
-                  styles.tab,
-                  perReminderMl === 250 && styles.tabActive,
-                ]}
+                style={[styles.tab, perReminderMl === 250 && styles.tabActive]}
                 onPress={() => setPerReminderMl(250)}>
                 <Text
                   style={[
@@ -253,10 +246,7 @@ export default function WaterBreaksScreen({onBack}: Props) {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[
-                  styles.tab,
-                  perReminderMl === 500 && styles.tabActive,
-                ]}
+                style={[styles.tab, perReminderMl === 500 && styles.tabActive]}
                 onPress={() => setPerReminderMl(500)}>
                 <Text
                   style={[
@@ -430,4 +420,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
