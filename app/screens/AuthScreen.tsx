@@ -12,12 +12,10 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import {theme} from '../../stores/ThemeStore';
 import {BackendService} from '../../services/BackendService';
-import 'react-native-get-random-values';
-import 'react-native-url-polyfill/auto';
-import {createClient} from '@supabase/supabase-js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 const {GoogleSignin} = require('@react-native-google-signin/google-signin');
 import LoaderOverlay from '../../components/LoaderOverlay';
+
+const BACKEND_URL = 'https://planme-backend-eduf.onrender.com/api';
 
 // Local types
 interface User {
@@ -26,22 +24,6 @@ interface User {
   name?: string;
   avatar_url?: string;
 }
-
-// Supabase client (scoped to this screen/file)
-const SUPABASE_URL = 'https://lmookidxihtttfzodbvf.supabase.co';
-const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxtb29raWR4aWh0dHRmem9kYnZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMzUxMDAsImV4cCI6MjA3MjgxMTEwMH0.1pFnwEKQDwDmHEKrBMYUilYDOlzR1eo5Vdn2p-wI-Ro';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    flowType: 'pkce',
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-    storage: AsyncStorage,
-    debug: false,
-  },
-});
 
 interface AuthScreenProps {
   onAuthSuccess: () => void;
@@ -74,33 +56,42 @@ export default function AuthScreen({onAuthSuccess}: AuthScreenProps) {
       const {idToken} = await GoogleSignin.getTokens();
       if (!idToken) throw new Error('No Google ID token received');
 
-      const {data, error} = await supabase.auth.signInWithIdToken({
-        provider: 'google',
-        token: idToken,
+      // Send Google token directly to backend for verification
+      const response = await fetch(`${BACKEND_URL}/user/google-auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({idToken}),
       });
-      if (error) throw new Error(error.message);
 
-      const email = data?.user?.email || '';
-      const userId = data?.user?.id || '';
-      if (!email || !userId) throw new Error('Missing user identifiers');
+      if (!response.ok) {
+        throw new Error('Backend authentication failed');
+      }
 
-      const backend = await BackendService.checkUser(email, userId, '');
-      if (
-        backend.success &&
-        backend.user &&
-        typeof backend.user.name === 'string' &&
-        backend.user.name.trim().length > 0
-      ) {
+      const data = await response.json();
+
+      if (!data.success || !data.user) {
+        throw new Error('Authentication failed');
+      }
+
+      const {user: backendUser} = data;
+      const userId = backendUser.user_id;
+      const email = backendUser.email;
+      const name = backendUser.name;
+      const avatarUrl = data.user.avatar_url;
+
+      if (name && name.trim().length > 0) {
         setStatusMsg('Welcome back!');
         setIsLoading(false);
 
         // Update auth store with user data
         const {useAuthStore} = require('../../stores/authStore');
-        useAuthStore.getState().setUser({
+        await useAuthStore.getState().setUser({
           id: userId,
           email,
-          name: backend.user.name,
-          avatar_url: data?.user?.user_metadata?.avatar_url,
+          name,
+          avatar_url: avatarUrl,
         });
 
         // Small delay to ensure state update is processed
@@ -111,7 +102,7 @@ export default function AuthScreen({onAuthSuccess}: AuthScreenProps) {
         const nextUser: User = {
           id: userId,
           email,
-          avatar_url: data?.user?.user_metadata?.avatar_url,
+          avatar_url: avatarUrl,
         };
         setPendingUser(nextUser);
         setShowUsername(true);

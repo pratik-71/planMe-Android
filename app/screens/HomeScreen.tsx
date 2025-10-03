@@ -2,14 +2,23 @@ import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {initialize, schedule} from '../../services/AlarmScheduler';
+import {
+  initialize as initializeWater,
+  scheduleWaterNotification,
+} from '../../services/WaterNotificationService';
 import {theme} from '../../stores/ThemeStore';
 
 interface Props {
   onScheduleDay: () => void;
   onViewDay: () => void;
+  onOpenWaterBreaks: () => void;
 }
 
-export default function HomeScreen({onScheduleDay, onViewDay}: Props) {
+export default function HomeScreen({
+  onScheduleDay,
+  onViewDay,
+  onOpenWaterBreaks,
+}: Props) {
   return (
     <LinearGradient
       colors={[theme.background, theme.surface, theme.surfaceVariant]}
@@ -51,6 +60,51 @@ export default function HomeScreen({onScheduleDay, onViewDay}: Props) {
               </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity
+              style={styles.waterButton}
+              onPress={onOpenWaterBreaks}>
+              <LinearGradient
+                colors={['#4FC3F7', '#0288D1']}
+                style={styles.waterButtonGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}>
+                <Text style={styles.waterButtonText}>
+                  💧 Schedule Water Breaks
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.testWaterButton}
+              onPress={async () => {
+                try {
+                  await initializeWater();
+                  const in15Sec = new Date(Date.now() + 15 * 1000);
+                  await scheduleWaterNotification({
+                    id: `test_water_${Date.now()}`,
+                    title: 'Test Water Reminder - Drink 250ml',
+                    dateTime: in15Sec,
+                  });
+                  Alert.alert(
+                    '💧 Scheduled',
+                    'Test water notification in 15 seconds',
+                  );
+                } catch (e) {
+                  Alert.alert(
+                    'Schedule failed',
+                    'Could not schedule water notification.',
+                  );
+                }
+              }}>
+              <LinearGradient
+                colors={['#4FC3F7', '#0288D1']}
+                style={styles.testWaterButtonGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}>
+                <Text style={styles.testWaterButtonText}>
+                  Test Water Notification (15s)
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={styles.testButton}
               onPress={async () => {
                 try {
@@ -61,9 +115,15 @@ export default function HomeScreen({onScheduleDay, onViewDay}: Props) {
                     title: 'Test Alarm (30s)',
                     dateTime: in30Sec,
                   });
-                  Alert.alert('Scheduled', 'Test alarm set for 30 seconds from now.');
+                  Alert.alert(
+                    'Scheduled',
+                    'Test alarm set for 30 seconds from now.',
+                  );
                 } catch (e) {
-                  Alert.alert('Schedule failed', 'Could not schedule the alarm.');
+                  Alert.alert(
+                    'Schedule failed',
+                    'Could not schedule the alarm.',
+                  );
                 }
               }}>
               <LinearGradient
@@ -203,6 +263,48 @@ const styles = StyleSheet.create({
     color: theme.textPrimary,
     fontSize: 14,
     fontWeight: '700',
+  },
+  waterButton: {
+    borderRadius: 16,
+    marginTop: 16,
+    shadowColor: '#0288D1',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  waterButtonGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waterButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  testWaterButton: {
+    borderRadius: 16,
+    marginTop: 16,
+    shadowColor: '#0288D1',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  testWaterButtonGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  testWaterButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
   footer: {
     position: 'absolute',

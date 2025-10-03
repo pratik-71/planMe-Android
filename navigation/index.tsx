@@ -14,6 +14,7 @@ import HomeScreen from '../app/screens/HomeScreen';
 import ScheduleDayScreen from '../app/screens/ScheduleDayScreen';
 import ViewDayScreen from '../app/screens/ViewDayScreen';
 import AlarmScreen from '../app/screens/AlarmScreen';
+import WaterBreaksScreen from '../app/screens/WaterBreaksScreen';
 import MainLayout from '../components/MainLayout';
 import {theme} from '../stores/ThemeStore';
 
@@ -21,7 +22,8 @@ export type Route =
   | {name: 'Home'}
   | {name: 'ScheduleDay'; params: {dateISO: string}}
   | {name: 'ViewDay'; params: {dateISO: string}}
-  | {name: 'Alarm'; params: {slotTitle: string; slotId: string}};
+  | {name: 'Alarm'; params: {slotTitle: string; slotId: string}}
+  | {name: 'WaterBreaks'};
 
 interface SidebarProps {
   showSidebar: boolean;
@@ -119,6 +121,8 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
           setRoute({name: 'Alarm', params: params});
         } else if (screenName === 'ViewDay') {
           setRoute({name: 'ViewDay', params: params});
+        } else if (screenName === 'WaterBreaks') {
+          setRoute({name: 'WaterBreaks'});
         }
       },
     };
@@ -222,6 +226,27 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
       </View>
     );
   }
+  if (route.name === 'WaterBreaks') {
+    return (
+      <View style={styles.container}>
+        <MainLayout
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          backendUser={backendUser}
+          user={user}>
+          <WaterBreaksScreen onBack={() => setRoute({name: 'Home'})} />
+        </MainLayout>
+        <Sidebar
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          setRoute={setRoute}
+          signOut={signOut}
+          backendUser={backendUser}
+          user={user}
+        />
+      </View>
+    );
+  }
   if (route.name === 'Alarm') {
     try {
       return (
@@ -250,6 +275,7 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
               onViewDay={() =>
                 setRoute({name: 'ViewDay', params: {dateISO: todayISO}})
               }
+              onOpenWaterBreaks={() => setRoute({name: 'WaterBreaks'})}
             />
           </MainLayout>
         </View>
@@ -270,6 +296,7 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm}) => {
           onViewDay={() =>
             setRoute({name: 'ViewDay', params: {dateISO: todayISO}})
           }
+          onOpenWaterBreaks={() => setRoute({name: 'WaterBreaks'})}
         />
       </MainLayout>
       <Sidebar

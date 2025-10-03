@@ -26,9 +26,12 @@
     public static *** e(...);
 }
 
-# Safe optimizations (less aggressive to prevent crashes)
--optimizationpasses 3
+# More aggressive optimizations for smaller size
+-optimizationpasses 5
 -dontobfuscate
+-optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
+-allowaccessmodification
+-repackageclasses ''
 
 # Keep React Native classes safe
 -keep class com.facebook.react.bridge.** { *; }
@@ -39,6 +42,21 @@
 -dontwarn com.facebook.react.**
 -dontwarn okio.**
 -dontwarn javax.annotation.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
 
 # Keep line numbers for crash reports
 -keepattributes SourceFile,LineNumberTable
+
+# Notifee optimization
+-keep class app.notifee.** { *; }
+-keep class io.invertase.notifee.** { *; }
+
+# Supabase optimization
+-keep class io.supabase.** { *; }
+-dontwarn io.supabase.**
+
+# Google Sign-In optimization  
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
