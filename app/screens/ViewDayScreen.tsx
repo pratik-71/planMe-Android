@@ -101,6 +101,47 @@ export default function ViewDayScreen({
     return () => backHandler.remove();
   }, [handleBackPress]);
 
+  const toggleReminder = async (planId: number, slotId: string) => {
+    if (!plans.length || isUpdating) return;
+
+    // Only allow editing today's plan
+    if (!isToday) {
+      Alert.alert(
+        'Cannot Edit',
+        "You can only edit today's plan. Please select today's date to make changes.",
+        [{text: 'OK'}],
+      );
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const updatedPlans = plans.map(plan => {
+        if (plan.planId === planId) {
+          return {
+            ...plan,
+            slots: plan.slots.map(s =>
+              s.id === slotId ? {...s, completed: !s.completed} : s,
+            ),
+          };
+        }
+        return plan;
+      });
+      setPlans(updatedPlans);
+
+      // Find the updated plan and save it
+      const updatedPlan = updatedPlans.find(plan => plan.planId === planId);
+      if (updatedPlan) {
+        await saveSchedule(updatedPlan);
+      }
+    } catch (error) {
+      console.error('Error updating reminder:', error);
+      Alert.alert('Error', 'Failed to update reminder');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const toggleSubgoal = async (
     planId: number,
     slotId: string,
@@ -239,15 +280,46 @@ export default function ViewDayScreen({
                         style={styles.slotCard}
                         start={{x: 0, y: 0}}
                         end={{x: 1, y: 1}}>
-                        <View style={styles.slotHeader}>
-                          <Text style={styles.slotTitle}>{item.title}</Text>
-                          <View style={styles.timeBadge}>
-                            <Text style={styles.timeText}>
-                              {new Date(item.startISO).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                        <View style={styles.reminderHeaderRow}>
+                          <TouchableOpacity
+                            style={[
+                              styles.reminderCheckboxContainer,
+                              !isToday && styles.checkboxDisabled,
+                            ]}
+                            onPress={() =>
+                              toggleReminder(plan.planId!, item.id)
+                            }
+                            disabled={isUpdating || !isToday}>
+                            <View
+                              style={[
+                                styles.reminderCheckbox,
+                                item.completed && styles.checkboxCompleted,
+                                !isToday && styles.checkboxDisabled,
+                              ]}>
+                              {item.completed && (
+                                <Text style={styles.checkmark}>✓</Text>
+                              )}
+                            </View>
+                          </TouchableOpacity>
+                          <View style={styles.slotHeader}>
+                            <Text
+                              style={[
+                                styles.slotTitle,
+                                item.completed && styles.completedText,
+                              ]}>
+                              {item.title}
                             </Text>
+                            <View style={styles.timeBadge}>
+                              <Text style={styles.timeText}>
+                                {new Date(item.startISO).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  },
+                                )}
+                              </Text>
+                            </View>
                           </View>
                         </View>
 
@@ -433,11 +505,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.borderLight,
   },
+  reminderHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  reminderCheckboxContainer: {
+    marginRight: 12,
+  },
+  reminderCheckbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: theme.border,
+    backgroundColor: theme.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   slotHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    flex: 1,
   },
   slotTitle: {
     fontSize: 18,

@@ -9,6 +9,7 @@ export interface TimeSlot {
   id: string;
   title: string;
   startISO: string; // ISO string
+  completed?: boolean; // Reminder completion status
   subgoals: Subgoal[];
   alarmId?: string;
   priority?: string;

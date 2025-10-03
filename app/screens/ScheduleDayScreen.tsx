@@ -191,6 +191,7 @@ export default function ScheduleDayScreen({dateISO, onDone}: Props) {
       id: editingSlot?.id || uniqueId('slot_'),
       title: modalTitle.trim(),
       startISO,
+      completed: editingSlot?.completed || false,
       subgoals: modalSubgoals,
       priority: modalSlotPriority,
       category: modalSlotCategory,

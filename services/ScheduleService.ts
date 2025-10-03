@@ -4,17 +4,14 @@ import {
   cancel as cancelAlarm,
 } from './AlarmScheduler';
 import {BackendService} from './BackendService';
-import {supabase} from '../stores/authStore';
+import {useAuthStore} from '../stores/authStore';
 
 // const keyForDate = (dateISO: string) => `schedule:${dateISO}`;
 
 export async function loadAllPlansForDate(
   dateISO: string,
 ): Promise<ScheduleDay[]> {
-  const {data} = await supabase.auth.getUser();
-  const user = data?.user
-    ? {id: data.user.id, email: data.user.email || ''}
-    : null;
+  const user = useAuthStore.getState().user;
   if (!user) return [];
 
   try {
@@ -53,6 +50,7 @@ export async function loadAllPlansForDate(
           title: r.title || r.name || 'Untitled',
           startISO:
             r.startISO || r.time || r.start_time || new Date().toISOString(),
+          completed: r.completed || false,
           subgoals: r.subgoals || [],
           priority: r.priority || 'medium',
           category: r.category || 'general',
@@ -78,10 +76,7 @@ export async function loadAllPlansForDate(
 }
 
 export async function saveSchedule(day: ScheduleDay): Promise<void> {
-  const {data} = await supabase.auth.getUser();
-  const user = data?.user
-    ? {id: data.user.id, email: data.user.email || ''}
-    : null;
+  const user = useAuthStore.getState().user;
   if (!user) return;
 
   const dayName = new Date(day.dateISO).toLocaleDateString(undefined, {
@@ -92,6 +87,7 @@ export async function saveSchedule(day: ScheduleDay): Promise<void> {
     id: slot.id,
     title: slot.title,
     startISO: slot.startISO,
+    completed: slot.completed || false,
     subgoals: slot.subgoals || [],
     priority: slot.priority || 'medium',
     category: slot.category || 'general',
@@ -147,10 +143,7 @@ export async function addDailyPlan(
   planDateISO: string,
   reminders: any[],
 ) {
-  const {data} = await supabase.auth.getUser();
-  const user = data?.user
-    ? {id: data.user.id, email: data.user.email || ''}
-    : null;
+  const user = useAuthStore.getState().user;
   if (!user) throw new Error('Not authenticated');
   return BackendService.addDailyPlan(user.id, planName, planDateISO, reminders);
 }
