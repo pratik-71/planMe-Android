@@ -74,9 +74,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.alarmapp"
+    namespace "com.planme"
     defaultConfig {
-        applicationId "com.alarmapp"
+        applicationId "com.planme"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -103,7 +103,7 @@ android {
             zipAlignEnabled true
             crunchPngs true
             // More aggressive resource shrinking
-            resValue "string", "build_config_package", "com.alarmapp"
+            resValue "string", "build_config_package", "com.planme"
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }

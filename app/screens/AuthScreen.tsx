@@ -243,7 +243,7 @@ export default function AuthScreen({onAuthSuccess}: AuthScreenProps) {
         translucent
       />
       <View style={styles.center}>
-        <Text style={styles.title}>Welcome</Text>
+        <Text style={styles.title}>Welcome to PlanMe</Text>
         <Text style={styles.subtitle}>Sign in with Google to continue</Text>
         <TouchableOpacity
           style={styles.primaryButton}

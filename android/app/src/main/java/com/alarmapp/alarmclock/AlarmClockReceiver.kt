@@ -1,4 +1,4 @@
-package com.alarmapp.alarmclock
+package com.planme.alarmclock
 
 import android.content.BroadcastReceiver
 import android.content.Context

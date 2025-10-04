@@ -1,4 +1,4 @@
-package com.alarmapp
+package com.planme
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

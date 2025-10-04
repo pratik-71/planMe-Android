@@ -152,11 +152,11 @@ export async function schedule(alarm: AlarmPayload) {
               // silent visual only; ForegroundService provides the tone
               pressAction: {
                 id: 'open_alarm',
-                launchActivity: 'com.alarmapp.MainActivity',
+                launchActivity: 'com.planme.MainActivity',
               },
               fullScreenAction: {
                 id: 'open_alarm',
-                launchActivity: 'com.alarmapp.MainActivity',
+                launchActivity: 'com.planme.MainActivity',
               },
               autoCancel: true,
               showTimestamp: true,
@@ -197,7 +197,7 @@ export async function schedule(alarm: AlarmPayload) {
           vibrationPattern: [300, 700, 300, 700],
           pressAction: {
             id: 'open_alarm',
-            launchActivity: 'com.alarmapp.MainActivity',
+            launchActivity: 'com.planme.MainActivity',
           },
           // No fullScreenAction so it doesn't pop UI over lock screen
           autoCancel: true, // Auto-remove on tap

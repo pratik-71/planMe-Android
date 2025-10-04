@@ -1,4 +1,4 @@
-package com.alarmapp;
+package com.planme;
 
 import android.content.Intent;
 import android.os.IBinder;

@@ -1,4 +1,4 @@
-package com.alarmapp;
+package com.planme;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

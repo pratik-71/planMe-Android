@@ -1,13 +1,15 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {theme} from '../../stores/ThemeStore';
+import {getContextualMotivation} from '../../constants/motivationalQuotes';
 
 interface Props {
   onScheduleDay: () => void;
   onViewDay: () => void;
   onOpenWaterBreaks: () => void;
   onManage: () => void;
+  completionRate?: number;
 }
 
 export default function HomeScreen({
@@ -15,7 +17,34 @@ export default function HomeScreen({
   onViewDay,
   onOpenWaterBreaks,
   onManage,
+  completionRate,
 }: Props) {
+  const [motivationQuote, setMotivationQuote] = useState('');
+
+  useEffect(() => {
+    // Get current time of day
+    const hour = new Date().getHours();
+    const day = new Date().getDay();
+
+    let timeOfDay: 'morning' | 'evening' | 'weekend' | undefined;
+
+    if (day === 0 || day === 6) {
+      timeOfDay = 'weekend';
+    } else if (hour >= 6 && hour < 12) {
+      timeOfDay = 'morning';
+    } else if (hour >= 18) {
+      timeOfDay = 'evening';
+    }
+
+    // Get motivational quote based on context
+    const quote = getContextualMotivation({
+      completionRate: completionRate,
+      currentStreak: 0, // Will be updated when backend integration is complete
+      timeOfDay: timeOfDay,
+    });
+
+    setMotivationQuote(quote);
+  }, [completionRate]);
   return (
     <LinearGradient
       colors={[theme.background, theme.surface, theme.surfaceVariant]}
@@ -27,6 +56,22 @@ export default function HomeScreen({
           <Text style={styles.title}>PlanMe</Text>
           <Text style={styles.subtitle}>Simple daily planning</Text>
         </View>
+
+        {/* Motivational Quote Card */}
+        {motivationQuote && (
+          <View style={styles.motivationCard}>
+            <LinearGradient
+              colors={[theme.primary + '15', theme.accent + '10']}
+              style={styles.motivationGradient}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}>
+              <View style={styles.motivationIconContainer}>
+                <Text style={styles.motivationIcon}>💪</Text>
+              </View>
+              <Text style={styles.motivationText}>{motivationQuote}</Text>
+            </LinearGradient>
+          </View>
+        )}
 
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
@@ -92,7 +137,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
   },
   title: {
     fontSize: 24,
@@ -106,6 +151,45 @@ const styles = StyleSheet.create({
     color: theme.textSecondary,
     textAlign: 'center',
     fontWeight: '500',
+  },
+  motivationCard: {
+    width: '100%',
+    maxWidth: 340,
+    marginBottom: 24,
+    borderRadius: 16,
+    shadowColor: theme.primary,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  motivationGradient: {
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: theme.primary + '30',
+  },
+  motivationIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.primary + '20',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  motivationIcon: {
+    fontSize: 22,
+  },
+  motivationText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+    color: theme.textPrimary,
+    fontWeight: '600',
   },
   buttonsContainer: {
     width: '100%',

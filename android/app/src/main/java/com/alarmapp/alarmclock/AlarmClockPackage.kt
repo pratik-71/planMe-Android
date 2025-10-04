@@ -1,4 +1,4 @@
-package com.alarmapp.alarmclock
+package com.planme.alarmclock
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

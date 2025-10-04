@@ -1,4 +1,4 @@
-package com.alarmapp.alarmclock
+package com.planme.alarmclock
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -18,8 +18,8 @@ import android.os.Build
 import android.os.IBinder
 import android.content.pm.ServiceInfo
 import androidx.core.app.NotificationCompat
-import com.alarmapp.AlarmActivity
-import com.alarmapp.R
+import com.planme.AlarmActivity
+import com.planme.R
 import android.os.PowerManager
 import android.os.Handler
 import android.os.Looper
@@ -49,7 +49,7 @@ class AlarmClockService : Service() {
     ensureChannel()
 
     // Intent for opening app (MainActivity) when user taps the notification
-    val openAppIntent = Intent(this, com.alarmapp.MainActivity::class.java).apply {
+    val openAppIntent = Intent(this, com.planme.MainActivity::class.java).apply {
       addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
     val contentPending = PendingIntent.getActivity(

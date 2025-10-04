@@ -1,4 +1,4 @@
-package com.alarmapp.alarmclock
+package com.planme.alarmclock
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -29,7 +29,7 @@ class AlarmClockModule(private val ctx: ReactApplicationContext) : ReactContextB
       val showIntent = PendingIntent.getActivity(
         ctx,
         id.hashCode() + 1,
-        Intent(ctx, com.alarmapp.AlarmActivity::class.java),
+        Intent(ctx, com.planme.AlarmActivity::class.java),
         PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
       )
       val info = AlarmManager.AlarmClockInfo(triggerAtMs.toLong(), showIntent)
