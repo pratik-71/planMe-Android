@@ -48,13 +48,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <View style={styles.sidebar}>
       <LinearGradient
-        colors={[theme.background, theme.surface, theme.primaryLight]}
+        colors={[theme.surface, theme.background, theme.surfaceVariant]}
         style={styles.sidebarContent}
         start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}>
+        end={{x: 0, y: 1}}>
         <View style={styles.sidebarHeader}>
           <LinearGradient
-            colors={[theme.accent, theme.primary]}
+            colors={[theme.primary, theme.accent]}
             style={styles.sidebarProfileImage}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}>
@@ -67,6 +67,15 @@ const Sidebar: React.FC<SidebarProps> = ({
           <Text style={styles.sidebarUserName}>
             {backendUser?.name || user?.name || user?.email || 'User'}
           </Text>
+          <Text style={styles.sidebarUserEmail}>
+            {backendUser?.email || user?.email || ''}
+          </Text>
+          <View style={styles.sidebarStreakContainer}>
+            <Text style={styles.sidebarStreakIcon}>🔥</Text>
+            <Text style={styles.sidebarStreakText}>
+              {backendUser?.streak || 0} Day Streak
+            </Text>
+          </View>
         </View>
 
         <View style={styles.sidebarMenu}>
@@ -456,6 +465,33 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: theme.textPrimary,
     textAlign: 'center',
+    marginBottom: 4,
+  },
+  sidebarUserEmail: {
+    fontSize: 12,
+    color: theme.textSecondary,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  sidebarStreakContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 107, 53, 0.15)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 53, 0.3)',
+  },
+  sidebarStreakIcon: {
+    fontSize: 18,
+    marginRight: 6,
+  },
+  sidebarStreakText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.streakStart,
   },
   sidebarMenu: {
     flex: 1,

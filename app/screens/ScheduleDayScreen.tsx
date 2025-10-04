@@ -26,6 +26,11 @@ const uniqueId = (prefix = ''): string => {
   return `${prefix}${time}${rand}`;
 };
 import {theme} from '../../stores/ThemeStore';
+import {
+  TemplateService,
+  Template,
+  TemplateReminder,
+} from '../../services/TemplateService';
 
 interface Props {
   dateISO: string;
@@ -65,6 +70,14 @@ export default function ScheduleDayScreen({dateISO, onDone}: Props) {
   }>({});
   const [mainTitleError, setMainTitleError] = useState('');
   const [subgoalError, setSubgoalError] = useState('');
+
+  // Template state
+  const [showTemplateNameModal, setShowTemplateNameModal] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateNameError, setTemplateNameError] = useState('');
+  const [showTemplateListModal, setShowTemplateListModal] = useState(false);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
 
   // Modal-specific state variables
   const [modalTitle, setModalTitle] = useState('');
@@ -292,6 +305,134 @@ export default function ScheduleDayScreen({dateISO, onDone}: Props) {
     setExpandedSlots(newExpanded);
   };
 
+  // Template Functions
+  const handleCreateTemplate = () => {
+    if (!schedule || schedule.slots.length === 0) {
+      Alert.alert('No Reminders', 'Please add at least one reminder first.');
+      return;
+    }
+    setTemplateNameError('');
+    setTemplateName('');
+    setShowTemplateNameModal(true);
+  };
+
+  const saveTemplate = async () => {
+    if (!schedule) return;
+
+    // Validate template name
+    if (!templateName.trim()) {
+      setTemplateNameError('Template name is required');
+      return;
+    }
+    if (templateName.trim().length < 3) {
+      setTemplateNameError('Template name must be at least 3 characters');
+      return;
+    }
+
+    try {
+      // Extract only reminders (title + time), no subgoals
+      const reminders: TemplateReminder[] = schedule.slots.map(slot => {
+        const time = new Date(slot.startISO);
+        const timeStr = `${time.getHours().toString().padStart(2, '0')}:${time
+          .getMinutes()
+          .toString()
+          .padStart(2, '0')}`;
+        return {
+          title: slot.title,
+          time: timeStr,
+        };
+      });
+
+      await TemplateService.createTemplate(templateName.trim(), reminders);
+
+      Alert.alert('Success', 'Template saved successfully!');
+      setShowTemplateNameModal(false);
+      setTemplateName('');
+    } catch (error) {
+      console.error('Error saving template:', error);
+      Alert.alert('Error', 'Failed to save template. Please try again.');
+    }
+  };
+
+  const handleUseTemplate = async () => {
+    setLoadingTemplates(true);
+    try {
+      const userTemplates = await TemplateService.getUserTemplates();
+      setTemplates(userTemplates);
+      setShowTemplateListModal(true);
+    } catch (error) {
+      console.error('Error loading templates:', error);
+      Alert.alert('Error', 'Failed to load templates. Please try again.');
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const applyTemplate = (template: Template) => {
+    if (!schedule) return;
+
+    Alert.alert(
+      'Apply Template',
+      `Apply "${template.name}" template? This will replace current reminders.`,
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Apply',
+          onPress: () => {
+            // Convert template reminders to time slots
+            const newSlots: TimeSlot[] = template.reminders.map(reminder => {
+              const [hours, minutes] = reminder.time.split(':').map(Number);
+              const slotDate = new Date(workingDateISO);
+              slotDate.setHours(hours, minutes, 0, 0);
+
+              return {
+                id: uniqueId('slot-'),
+                title: reminder.title,
+                startISO: slotDate.toISOString(),
+                completed: false,
+                subgoals: [],
+              };
+            });
+
+            setSchedule({
+              ...schedule,
+              slots: newSlots,
+            });
+
+            setShowTemplateListModal(false);
+            Alert.alert('Success', 'Template applied successfully!');
+          },
+        },
+      ],
+    );
+  };
+
+  const deleteTemplate = async (templateId: number, name: string) => {
+    Alert.alert(
+      'Delete Template',
+      `Are you sure you want to delete "${name}"?`,
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await TemplateService.deleteTemplate(templateId);
+              // Refresh list
+              const userTemplates = await TemplateService.getUserTemplates();
+              setTemplates(userTemplates);
+              Alert.alert('Success', 'Template deleted successfully!');
+            } catch (error) {
+              console.error('Error deleting template:', error);
+              Alert.alert('Error', 'Failed to delete template.');
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const openAddSlotModal = () => {
     setEditingSlot(null);
     setModalTitle('');
@@ -475,6 +616,41 @@ export default function ScheduleDayScreen({dateISO, onDone}: Props) {
             }
             scrollEnabled={false}
           />
+        </View>
+
+        {/* Template Buttons */}
+        <View style={styles.templateButtons}>
+          <TouchableOpacity
+            style={styles.templateButton}
+            onPress={handleUseTemplate}
+            disabled={loadingTemplates}>
+            <LinearGradient
+              colors={[theme.accent, theme.primary]}
+              style={styles.templateButtonGradient}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}>
+              <Text style={styles.templateButtonText}>
+                {loadingTemplates ? 'Loading...' : 'Use Template'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.templateButton}
+            onPress={handleCreateTemplate}
+            disabled={!schedule || schedule.slots.length === 0}>
+            <LinearGradient
+              colors={
+                schedule && schedule.slots.length > 0
+                  ? [theme.primary, theme.accent]
+                  : [theme.disabled, theme.disabled]
+              }
+              style={styles.templateButtonGradient}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}>
+              <Text style={styles.templateButtonText}>Create Template</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity
@@ -727,6 +903,115 @@ export default function ScheduleDayScreen({dateISO, onDone}: Props) {
                     ]}>
                     {editingSlot ? 'Update' : 'Add'}
                   </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Template Name Modal */}
+        <Modal
+          transparent
+          visible={showTemplateNameModal}
+          animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>Create Template</Text>
+              <Text style={styles.modalSubtitle}>
+                Enter a name for this template
+              </Text>
+
+              <TextInput
+                style={[
+                  styles.input,
+                  templateNameError ? styles.inputError : null,
+                ]}
+                placeholder="Template name"
+                placeholderTextColor={theme.textTertiary}
+                value={templateName}
+                onChangeText={text => {
+                  setTemplateName(text);
+                  if (templateNameError && text.trim().length >= 3) {
+                    setTemplateNameError('');
+                  }
+                }}
+              />
+              {templateNameError && (
+                <Text style={styles.errorText}>{templateNameError}</Text>
+              )}
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.modalCancel]}
+                  onPress={() => setShowTemplateNameModal(false)}>
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.modalPrimary]}
+                  onPress={saveTemplate}>
+                  <Text
+                    style={[
+                      styles.modalButtonText,
+                      {color: theme.textInverse},
+                    ]}>
+                    Save
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Template List Modal */}
+        <Modal
+          transparent
+          visible={showTemplateListModal}
+          animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalCard, styles.templateListCard]}>
+              <Text style={styles.modalTitle}>Your Templates</Text>
+              <Text style={styles.modalSubtitle}>
+                Select a template to apply
+              </Text>
+
+              <FlatList
+                data={templates}
+                keyExtractor={item => item.id?.toString() || ''}
+                renderItem={({item}) => (
+                  <View style={styles.templateItem}>
+                    <TouchableOpacity
+                      style={styles.templateItemContent}
+                      onPress={() => applyTemplate(item)}>
+                      <Text style={styles.templateItemName}>{item.name}</Text>
+                      <Text style={styles.templateItemCount}>
+                        {item.reminders.length} reminder
+                        {item.reminders.length !== 1 ? 's' : ''}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.templateDeleteButton}
+                      onPress={() => deleteTemplate(item.id!, item.name)}>
+                      <Text style={styles.templateDeleteText}>🗑️</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                ListEmptyComponent={
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyText}>No templates yet</Text>
+                    <Text style={styles.emptyHint}>
+                      Create a template from the schedule screen
+                    </Text>
+                  </View>
+                }
+                scrollEnabled={true}
+                style={styles.templateList}
+              />
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.modalCancel]}
+                  onPress={() => setShowTemplateListModal(false)}>
+                  <Text style={styles.modalButtonText}>Close</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -1252,5 +1537,80 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: theme.textSecondary,
     textTransform: 'uppercase',
+  },
+  // Template styles
+  templateButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  templateButton: {
+    flex: 1,
+    borderRadius: 12,
+    shadowColor: theme.shadow,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  templateButtonGradient: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 12,
+  },
+  templateButtonText: {
+    color: theme.textInverse,
+    fontWeight: '700',
+    fontSize: 13,
+    letterSpacing: 0.2,
+  },
+  templateListCard: {
+    maxHeight: '80%',
+  },
+  templateList: {
+    maxHeight: 400,
+    marginVertical: 12,
+  },
+  templateItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.background,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: theme.borderLight,
+  },
+  templateItemContent: {
+    flex: 1,
+  },
+  templateItemName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    marginBottom: 4,
+  },
+  templateItemCount: {
+    fontSize: 13,
+    color: theme.textSecondary,
+    fontWeight: '500',
+  },
+  templateDeleteButton: {
+    padding: 8,
+  },
+  templateDeleteText: {
+    fontSize: 18,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: theme.textSecondary,
+    marginBottom: 16,
+  },
+  emptyHint: {
+    fontSize: 13,
+    color: theme.textTertiary,
+    marginTop: 8,
+    textAlign: 'center',
   },
 });

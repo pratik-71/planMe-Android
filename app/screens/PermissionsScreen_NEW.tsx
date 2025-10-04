@@ -109,12 +109,12 @@ export default function PermissionsScreen({
   if (checkingPermissions) {
     return (
       <LinearGradient
-        colors={[theme.background, theme.surface, theme.surfaceVariant]}
+        colors={[theme.primary, theme.primaryDark, theme.accent]}
         style={styles.container}
         start={{x: 0, y: 0}}
         end={{x: 1, y: 1}}>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.primary} />
+          <ActivityIndicator size="large" color="#FFFFFF" />
           <Text style={styles.loadingText}>Checking permissions...</Text>
         </View>
       </LinearGradient>
@@ -123,11 +123,12 @@ export default function PermissionsScreen({
 
   return (
     <LinearGradient
-      colors={[theme.background, theme.surface, theme.surfaceVariant]}
+      colors={[theme.primary, theme.primaryDark, theme.accent]}
       style={styles.container}
       start={{x: 0, y: 0}}
       end={{x: 1, y: 1}}>
       <View style={styles.content}>
+        <Text style={styles.appIcon}>🔔</Text>
         <Text style={styles.mainTitle}>App Permissions</Text>
         <Text style={styles.mainSubtitle}>
           Grant these permissions for the best experience
@@ -212,18 +213,18 @@ export default function PermissionsScreen({
           <LinearGradient
             colors={
               notificationGranted
-                ? [theme.accent, theme.primary]
+                ? ['#FFFFFF', '#F8F9FE']
                 : [theme.disabled, theme.disabled]
             }
             style={styles.continueButtonGradient}
             start={{x: 0, y: 0}}
-            end={{x: 1, y: 0}}>
+            end={{x: 0, y: 1}}>
             <Text
               style={[
                 styles.continueButtonText,
                 !notificationGranted && styles.continueButtonTextDisabled,
               ]}>
-              Continue
+              Continue →
             </Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -244,45 +245,56 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loadingText: {
-    color: theme.textPrimary,
-    fontSize: 14,
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: '600',
     marginTop: 16,
   },
   content: {
     width: '100%',
-    maxWidth: 400,
-    padding: 24,
-    borderRadius: 16,
+    maxWidth: 420,
+    padding: 32,
+    borderRadius: 28,
     backgroundColor: theme.surface,
     alignItems: 'center',
-    shadowColor: theme.shadow,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 16},
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
+    elevation: 20,
+  },
+  appIcon: {
+    fontSize: 72,
+    marginBottom: 20,
   },
   mainTitle: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: '800',
     color: theme.textPrimary,
-    marginBottom: 10,
+    marginBottom: 12,
+    letterSpacing: -0.8,
   },
   mainSubtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: theme.textSecondary,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 32,
     fontWeight: '500',
+    lineHeight: 22,
   },
   card: {
     backgroundColor: theme.background,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 16,
     width: '100%',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: theme.border,
+    shadowColor: theme.shadow,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -291,87 +303,93 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     color: theme.textPrimary,
+    letterSpacing: -0.3,
   },
   statusGranted: {
     color: theme.success,
-    fontWeight: '700',
-    fontSize: 13,
+    fontWeight: '800',
+    fontSize: 14,
+    letterSpacing: 0.2,
   },
   statusPending: {
     color: theme.error,
-    fontWeight: '700',
-    fontSize: 13,
+    fontWeight: '800',
+    fontSize: 14,
+    letterSpacing: 0.2,
   },
   statusOptional: {
     color: theme.info,
-    fontWeight: '600',
-    fontSize: 12,
+    fontWeight: '700',
+    fontSize: 13,
   },
   cardDescription: {
-    fontSize: 13,
+    fontSize: 14,
     color: theme.textSecondary,
-    marginBottom: 12,
-    lineHeight: 18,
+    marginBottom: 16,
+    lineHeight: 20,
+    fontWeight: '500',
   },
   grantButton: {
-    borderRadius: 10,
+    borderRadius: 14,
     overflow: 'hidden',
     marginTop: 4,
-    shadowColor: theme.primary,
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowColor: theme.accent,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   grantButtonGradient: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   grantButtonText: {
     color: theme.textInverse,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
+    letterSpacing: 0.3,
   },
   skipButton: {
-    marginTop: 8,
+    marginTop: 12,
     alignItems: 'center',
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
   skipButtonText: {
     color: theme.textTertiary,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
   },
   continueButton: {
     width: '100%',
-    borderRadius: 12,
+    borderRadius: 18,
     overflow: 'hidden',
-    marginTop: 20,
-    shadowColor: theme.accent,
-    shadowOffset: {width: 0, height: 3},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    marginTop: 24,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 8},
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 10,
   },
   continueButtonDisabled: {
     shadowOpacity: 0,
     elevation: 0,
   },
   continueButtonGradient: {
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    paddingVertical: 18,
+    paddingHorizontal: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
   continueButtonText: {
-    color: theme.textInverse,
-    fontSize: 16,
-    fontWeight: '700',
+    color: theme.textPrimary,
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   continueButtonTextDisabled: {
     color: theme.disabledText,

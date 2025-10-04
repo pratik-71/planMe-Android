@@ -20,14 +20,14 @@ interface MainLayoutProps {
 export default function MainLayout({
   children,
   backendUser,
-  user,
+  user: _user,
   showSidebar,
   setShowSidebar,
 }: MainLayoutProps) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={[theme.primary, theme.accent, theme.primaryLight]}
+        colors={[theme.primary, theme.accent]}
         style={styles.header}
         start={{x: 0, y: 0}}
         end={{x: 1, y: 0}}>
@@ -41,20 +41,17 @@ export default function MainLayout({
           onPress={() => setShowSidebar(!showSidebar)}>
           <Text style={styles.menuIcon}>≡</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>DayScheduler</Text>
-        <TouchableOpacity style={styles.profileButton}>
+        <Text style={styles.headerTitle}>PlanMe</Text>
+        <View style={styles.streakContainer}>
           <LinearGradient
-            colors={[theme.accent, theme.primary]}
-            style={styles.profileImageContainer}
+            colors={[theme.streakStart, theme.streakEnd]}
+            style={styles.streakBadge}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}>
-            <Text style={styles.profileImageText}>
-              {(backendUser?.name || user?.name || user?.email || 'U')
-                .charAt(0)
-                .toUpperCase()}
-            </Text>
+            <Text style={styles.streakIcon}>🔥</Text>
+            <Text style={styles.streakText}>{backendUser?.streak || 0}</Text>
           </LinearGradient>
-        </TouchableOpacity>
+        </View>
       </LinearGradient>
       <View style={styles.content}>{children}</View>
     </View>
@@ -98,24 +95,28 @@ const styles = StyleSheet.create({
     textShadowOffset: {width: 0, height: 1},
     textShadowRadius: 2,
   },
-  profileButton: {
-    padding: 8,
+  streakContainer: {
+    paddingHorizontal: 4,
   },
-  profileImageContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  streakBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: theme.shadow,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    shadowColor: theme.streakStart,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  profileImageText: {
-    color: theme.textInverse,
+  streakIcon: {
     fontSize: 14,
+    marginRight: 4,
+  },
+  streakText: {
+    color: theme.textInverse,
+    fontSize: 16,
     fontWeight: '700',
   },
   menuIcon: {

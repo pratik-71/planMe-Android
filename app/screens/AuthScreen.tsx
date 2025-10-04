@@ -180,18 +180,22 @@ export default function AuthScreen({onAuthSuccess}: AuthScreenProps) {
   if (showUsername) {
     return (
       <LinearGradient
-        colors={['#F5FAFF', '#ECFDF5', '#E8F7F6']}
+        colors={[theme.background, theme.surface, theme.surfaceVariant]}
         style={styles.container}
         start={{x: 0, y: 0}}
         end={{x: 1, y: 1}}>
-        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="transparent"
+          translucent
+        />
         <View style={styles.center}>
           <Text style={styles.title}>Choose a username</Text>
           <Text style={styles.subtitle}>{pendingUser?.email}</Text>
           <TextInput
             style={[styles.input, usernameError ? styles.inputError : null]}
             placeholder="Your username"
-            placeholderTextColor={theme.textSecondary}
+            placeholderTextColor={theme.textTertiary}
             value={username}
             onChangeText={text => {
               setUsername(text);
@@ -208,11 +212,17 @@ export default function AuthScreen({onAuthSuccess}: AuthScreenProps) {
             style={styles.primaryButton}
             onPress={handleSaveUsername}
             disabled={isLoading || !username.trim()}>
-            {isLoading ? (
-              <ActivityIndicator color={theme.textInverse} />
-            ) : (
-              <Text style={styles.primaryText}>Save and continue</Text>
-            )}
+            <LinearGradient
+              colors={[theme.primary, theme.accent]}
+              style={styles.primaryButtonGradient}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}>
+              {isLoading ? (
+                <ActivityIndicator color={theme.textInverse} />
+              ) : (
+                <Text style={styles.primaryText}>Save and continue</Text>
+              )}
+            </LinearGradient>
           </TouchableOpacity>
           {statusMsg ? <Text style={styles.hint}>{statusMsg}</Text> : null}
         </View>
@@ -267,59 +277,59 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '800',
-    color: theme.primary,
+    color: theme.textPrimary,
     marginBottom: 12,
-    letterSpacing: -0.5,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: theme.textSecondary,
     marginBottom: 32,
     textAlign: 'center',
+    fontWeight: '500',
   },
   primaryButton: {
-    borderRadius: 16,
+    width: '100%',
+    maxWidth: 320,
+    borderRadius: 12,
     shadowColor: theme.primary,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
     overflow: 'hidden',
   },
   primaryButtonGradient: {
-    paddingHorizontal: 32,
-    paddingVertical: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryText: {
     color: theme.textInverse,
+    fontSize: 16,
     fontWeight: '700',
-    fontSize: 18,
-    letterSpacing: 0.5,
-    textShadowColor: theme.shadow,
-    textShadowOffset: {width: 0, height: 1},
-    textShadowRadius: 2,
   },
   input: {
     width: '100%',
     maxWidth: 320,
-    backgroundColor: theme.background,
+    backgroundColor: theme.surface,
     borderColor: theme.border,
     borderWidth: 1,
     borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     color: theme.textPrimary,
-    marginTop: 12,
-    marginBottom: 12,
+    marginTop: 16,
+    marginBottom: 16,
+    fontSize: 15,
   },
   hint: {
     marginTop: 16,
+    fontSize: 13,
     color: theme.textSecondary,
-    fontSize: 14,
     textAlign: 'center',
   },
   inputError: {
@@ -329,8 +339,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: theme.error,
     fontSize: 12,
-    marginTop: 4,
-    marginLeft: 4,
-    fontWeight: '500',
+    marginBottom: 8,
+    fontWeight: '600',
   },
 });

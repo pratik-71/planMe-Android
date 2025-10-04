@@ -21,58 +21,46 @@ export default function HomeScreen({
       start={{x: 0, y: 0}}
       end={{x: 1, y: 1}}>
       <View style={styles.content}>
-        <LinearGradient
-          colors={[theme.background, theme.surface]}
-          style={styles.card}
-          start={{x: 0, y: 0}}
-          end={{x: 1, y: 1}}>
-          <View style={styles.header}>
-            <Text style={styles.title}>PlanMe</Text>
-            <Text style={styles.subtitle}>Simple daily planning</Text>
-          </View>
+        <View style={styles.header}>
+          <Text style={styles.title}>PlanMe</Text>
+          <Text style={styles.subtitle}>Simple daily planning</Text>
+        </View>
 
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={onScheduleDay}>
-              <LinearGradient
-                colors={[theme.primary, theme.accent]}
-                style={styles.primaryButtonGradient}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}>
-                <Text style={styles.primaryButtonText}>Schedule a day</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={onViewDay}>
-              <LinearGradient
-                colors={[theme.accent, theme.primary]}
-                style={styles.secondaryButtonGradient}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}>
-                <Text style={styles.secondaryButtonText}>View day</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.waterButton}
-              onPress={onOpenWaterBreaks}>
-              <LinearGradient
-                colors={['#4FC3F7', '#0288D1']}
-                style={styles.waterButtonGradient}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}>
-                <Text style={styles.waterButtonText}>
-                  💧 Schedule Water Breaks
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-      </View>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={onScheduleDay}>
+            <LinearGradient
+              colors={[theme.primary, theme.accent]}
+              style={styles.primaryButtonGradient}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}>
+              <Text style={styles.primaryButtonText}>Schedule a day</Text>
+            </LinearGradient>
+          </TouchableOpacity>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Make every day count</Text>
+          <TouchableOpacity style={styles.secondaryButton} onPress={onViewDay}>
+            <LinearGradient
+              colors={[theme.accent, theme.primary]}
+              style={styles.secondaryButtonGradient}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}>
+              <Text style={styles.secondaryButtonText}>View day</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.waterButton}
+            onPress={onOpenWaterBreaks}>
+            <LinearGradient
+              colors={['#4FC3F7', '#0288D1']}
+              style={styles.waterButtonGradient}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}>
+              <Text style={styles.waterButtonText}>Schedule Water Breaks</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
       </View>
     </LinearGradient>
   );
@@ -88,26 +76,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  card: {
-    width: '100%',
-    maxWidth: 360,
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: theme.shadow,
-    shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: theme.borderLight,
-  },
   header: {
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  icon: {
-    fontSize: 40,
-    marginBottom: 10,
+    marginBottom: 32,
   },
   title: {
     fontSize: 24,
@@ -115,7 +86,6 @@ const styles = StyleSheet.create({
     color: theme.primary,
     textAlign: 'center',
     marginBottom: 8,
-    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 14,
@@ -128,18 +98,18 @@ const styles = StyleSheet.create({
     maxWidth: 320,
   },
   primaryButton: {
-    borderRadius: 16,
+    borderRadius: 12,
     marginBottom: 16,
     shadowColor: theme.primary,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
     overflow: 'hidden',
   },
   primaryButtonGradient: {
     paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -147,23 +117,20 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
-    letterSpacing: 0.5,
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: {width: 0, height: 1},
-    textShadowRadius: 2,
   },
   secondaryButton: {
-    borderRadius: 16,
+    borderRadius: 12,
     shadowColor: theme.accent,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
     overflow: 'hidden',
+    marginBottom: 16,
   },
   secondaryButtonGradient: {
     paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -171,24 +138,19 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
-    letterSpacing: 0.5,
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: {width: 0, height: 1},
-    textShadowRadius: 2,
   },
   waterButton: {
-    borderRadius: 16,
-    marginTop: 16,
+    borderRadius: 12,
     shadowColor: '#0288D1',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
     overflow: 'hidden',
   },
   waterButtonGradient: {
     paddingHorizontal: 24,
-    paddingVertical: 14,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -196,17 +158,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 40,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  footerText: {
-    color: theme.textSecondary,
-    fontSize: 12,
-    fontWeight: '500',
   },
 });
