@@ -16,6 +16,8 @@ import ViewDayScreen from '../app/screens/ViewDayScreen';
 import AlarmScreen from '../app/screens/AlarmScreen';
 import WaterBreaksScreen from '../app/screens/WaterBreaksScreen';
 import PermissionsScreen from '../app/screens/PermissionsScreen';
+import ManageScreen from '../app/screens/ManageScreen';
+import AnalyticsScreen from '../app/screens/AnalyticsScreen';
 import MainLayout from '../components/MainLayout';
 import {theme} from '../stores/ThemeStore';
 
@@ -25,7 +27,9 @@ export type Route =
   | {name: 'ViewDay'; params: {dateISO: string}}
   | {name: 'Alarm'; params: {slotTitle: string; slotId: string}}
   | {name: 'WaterBreaks'}
-  | {name: 'Permissions'};
+  | {name: 'Permissions'}
+  | {name: 'Manage'}
+  | {name: 'Analytics'};
 
 interface SidebarProps {
   showSidebar: boolean;
@@ -79,6 +83,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         </View>
 
         <View style={styles.sidebarMenu}>
+          <Text style={styles.sidebarMenuTitle}>Menu</Text>
+
           <TouchableOpacity
             style={styles.sidebarItem}
             onPress={() => {
@@ -86,21 +92,60 @@ const Sidebar: React.FC<SidebarProps> = ({
               setRoute({name: 'Home'});
             }}>
             <View style={styles.sidebarIconWrapper}>
-              <Text style={styles.sidebarIcon}>⌂</Text>
+              <Text style={styles.sidebarIcon}>🏠</Text>
             </View>
-            <Text style={styles.sidebarItemText}>Home</Text>
+            <View style={styles.sidebarItemContent}>
+              <Text style={styles.sidebarItemText}>Home</Text>
+              <Text style={styles.sidebarItemHint}>Main screen</Text>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.sidebarItem}
             onPress={() => {
               setShowSidebar(false);
+              setRoute({name: 'Manage'});
+            }}>
+            <View style={styles.sidebarIconWrapper}>
+              <Text style={styles.sidebarIcon}>📋</Text>
+            </View>
+            <View style={styles.sidebarItemContent}>
+              <Text style={styles.sidebarItemText}>Manage</Text>
+              <Text style={styles.sidebarItemHint}>Templates & schedules</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.sidebarItem}
+            onPress={() => {
+              setShowSidebar(false);
+              setRoute({name: 'Analytics'});
+            }}>
+            <View style={styles.sidebarIconWrapper}>
+              <Text style={styles.sidebarIcon}>📊</Text>
+            </View>
+            <View style={styles.sidebarItemContent}>
+              <Text style={styles.sidebarItemText}>Analytics</Text>
+              <Text style={styles.sidebarItemHint}>View your stats</Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.sidebarDivider} />
+
+          <TouchableOpacity
+            style={[styles.sidebarItem, styles.sidebarSignOut]}
+            onPress={() => {
+              setShowSidebar(false);
               signOut();
             }}>
             <View style={styles.sidebarIconWrapper}>
-              <Text style={styles.sidebarIcon}>↪</Text>
+              <Text style={styles.sidebarIcon}>🚪</Text>
             </View>
-            <Text style={styles.sidebarItemText}>Sign Out</Text>
+            <View style={styles.sidebarItemContent}>
+              <Text style={[styles.sidebarItemText, styles.signOutText]}>
+                Sign Out
+              </Text>
+            </View>
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -287,6 +332,51 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm: _initialAlarm}) => {
       </View>
     );
   }
+
+  if (route.name === 'Manage') {
+    return (
+      <View style={styles.container}>
+        <MainLayout
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          backendUser={backendUser}
+          user={user}>
+          <ManageScreen onBack={() => setRoute({name: 'Home'})} />
+        </MainLayout>
+        <Sidebar
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          setRoute={setRoute}
+          signOut={signOut}
+          backendUser={backendUser}
+          user={user}
+        />
+      </View>
+    );
+  }
+
+  if (route.name === 'Analytics') {
+    return (
+      <View style={styles.container}>
+        <MainLayout
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          backendUser={backendUser}
+          user={user}>
+          <AnalyticsScreen onBack={() => setRoute({name: 'Home'})} />
+        </MainLayout>
+        <Sidebar
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          setRoute={setRoute}
+          signOut={signOut}
+          backendUser={backendUser}
+          user={user}
+        />
+      </View>
+    );
+  }
+
   if (route.name === 'Alarm') {
     try {
       return (
@@ -316,6 +406,7 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm: _initialAlarm}) => {
                 setRoute({name: 'ViewDay', params: {dateISO: todayISO}})
               }
               onOpenWaterBreaks={() => setRoute({name: 'WaterBreaks'})}
+              onManage={() => setRoute({name: 'Manage'})}
             />
           </MainLayout>
         </View>
@@ -337,6 +428,7 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm: _initialAlarm}) => {
             setRoute({name: 'ViewDay', params: {dateISO: todayISO}})
           }
           onOpenWaterBreaks={() => setRoute({name: 'WaterBreaks'})}
+          onManage={() => setRoute({name: 'Manage'})}
         />
       </MainLayout>
       <Sidebar
@@ -505,44 +597,67 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
+  sidebarMenuTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: theme.textTertiary,
+    marginBottom: 12,
+    marginTop: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   sidebarItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderRadius: 12,
-    marginBottom: 12,
-    backgroundColor: 'rgba(0,188,212,0.1)',
+    marginBottom: 8,
+    backgroundColor: theme.surface,
     borderWidth: 1,
-    borderColor: 'rgba(0,188,212,0.2)',
-    shadowColor: theme.shadow,
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    borderColor: theme.borderLight,
+  },
+  sidebarItemContent: {
+    flex: 1,
+    marginLeft: 12,
   },
   sidebarItemText: {
-    fontSize: 18,
-    color: theme.primary,
-    marginLeft: 16,
+    fontSize: 16,
+    color: theme.textPrimary,
     fontWeight: '600',
+    marginBottom: 2,
+  },
+  sidebarItemHint: {
+    fontSize: 12,
+    color: theme.textTertiary,
+    fontWeight: '500',
   },
   sidebarIconWrapper: {
-    width: 32,
-    height: 32,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,188,212,0.15)',
-    borderRadius: 8,
+    backgroundColor: theme.primary + '15',
+    borderRadius: 10,
+  },
+  sidebarIcon: {
+    fontSize: 20,
+  },
+  sidebarDivider: {
+    height: 1,
+    backgroundColor: theme.borderLight,
+    marginVertical: 12,
+  },
+  sidebarSignOut: {
+    backgroundColor: 'rgba(244, 67, 54, 0.08)',
+    borderColor: 'rgba(244, 67, 54, 0.2)',
+  },
+  signOutText: {
+    color: theme.error,
   },
   menuIcon: {
     fontSize: 28,
     color: theme.textInverse,
-    fontWeight: 'bold',
-  },
-  sidebarIcon: {
-    fontSize: 18,
-    color: theme.primary,
     fontWeight: 'bold',
   },
   loadingContainer: {

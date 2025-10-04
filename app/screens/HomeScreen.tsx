@@ -7,12 +7,14 @@ interface Props {
   onScheduleDay: () => void;
   onViewDay: () => void;
   onOpenWaterBreaks: () => void;
+  onManage: () => void;
 }
 
 export default function HomeScreen({
   onScheduleDay,
   onViewDay,
   onOpenWaterBreaks,
+  onManage,
 }: Props) {
   return (
     <LinearGradient
@@ -58,6 +60,18 @@ export default function HomeScreen({
               start={{x: 0, y: 0}}
               end={{x: 1, y: 0}}>
               <Text style={styles.waterButtonText}>Schedule Water Breaks</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.manageButton} onPress={onManage}>
+            <LinearGradient
+              colors={[theme.surfaceVariant, theme.surface]}
+              style={styles.manageButtonGradient}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}>
+              <Text style={styles.manageButtonText}>
+                Manage Templates & Schedules
+              </Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -158,5 +172,28 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
+  },
+  manageButton: {
+    borderRadius: 12,
+    shadowColor: theme.shadow,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    elevation: 2,
+    overflow: 'hidden',
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: theme.borderLight,
+  },
+  manageButtonGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  manageButtonText: {
+    color: theme.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
