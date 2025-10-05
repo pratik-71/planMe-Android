@@ -100,7 +100,8 @@ export default function ManageScreen({onBack}: Props) {
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{item.name}</Text>
         <Text style={styles.cardSubtitle}>
-          {item.reminders.length} reminder{item.reminders.length !== 1 ? 's' : ''}
+          {item.reminders.length} reminder
+          {item.reminders.length !== 1 ? 's' : ''}
         </Text>
         <View style={styles.remindersList}>
           {item.reminders.slice(0, 3).map((reminder, index) => (
@@ -134,7 +135,10 @@ export default function ManageScreen({onBack}: Props) {
         <View style={styles.remindersList}>
           {item.slots.slice(0, 3).map(slot => {
             const time = new Date(slot.startISO);
-            const timeStr = `${time.getHours().toString().padStart(2, '0')}:${time
+            const timeStr = `${time
+              .getHours()
+              .toString()
+              .padStart(2, '0')}:${time
               .getMinutes()
               .toString()
               .padStart(2, '0')}`;
@@ -356,4 +360,3 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 });
-

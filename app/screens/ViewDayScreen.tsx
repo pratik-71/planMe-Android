@@ -11,7 +11,7 @@ import {
   BackHandler,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import LinearGradient from 'react-native-linear-gradient';
+// Flat UI - removed gradients for a cleaner look
 import {ScheduleDay} from '../../domain/schedule.types';
 import {
   loadAllPlansForDate,
@@ -196,67 +196,52 @@ export default function ViewDayScreen({
 
   if (isLoading) {
     return (
-      <LinearGradient
-        colors={[theme.background, theme.surface, theme.surfaceVariant]}
-        style={styles.loadingContainer}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 1}}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.primary} />
         <Text style={styles.loadingText}>Loading today's plan...</Text>
-      </LinearGradient>
+      </View>
     );
   }
 
   return (
-    <LinearGradient
-      colors={[theme.background, theme.surface, theme.surfaceVariant]}
-      style={styles.container}
-      start={{x: 0, y: 0}}
-      end={{x: 1, y: 1}}>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => changeDay(-1)}>
+          <Text style={styles.navButtonText}>◀</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.dateCard}
+          onPress={() => setShowDatePicker(true)}>
+          <Text style={styles.dayName}>{dayName}</Text>
+          <Text style={styles.dateText}>{currentDateISO}</Text>
+          {!isToday && <Text style={styles.readOnlyIndicator}>Read Only</Text>}
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navButton} onPress={() => changeDay(1)}>
+          <Text style={styles.navButtonText}>▶</Text>
+        </TouchableOpacity>
+      </View>
+
+      {showDatePicker && (
+        <View style={styles.datePickerContainer}>
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={handleDateChange}
+            maximumDate={new Date(2030, 11, 31)}
+            minimumDate={new Date(2020, 0, 1)}
+          />
+        </View>
+      )}
+
       <ScrollView
         style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}>
-        <LinearGradient
-          colors={[theme.primary, theme.primaryDark]}
-          style={styles.header}
-          start={{x: 0, y: 0}}
-          end={{x: 0, y: 0}}>
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => changeDay(-1)}>
-            <Text style={styles.navButtonText}>◀</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.dateCard}
-            onPress={() => setShowDatePicker(true)}>
-            <Text style={styles.dayName}>{dayName}</Text>
-            <Text style={styles.dateText}>{currentDateISO}</Text>
-            {!isToday && (
-              <Text style={styles.readOnlyIndicator}>Read Only</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => changeDay(1)}>
-            <Text style={styles.navButtonText}>▶</Text>
-          </TouchableOpacity>
-        </LinearGradient>
-
-        {showDatePicker && (
-          <View style={styles.datePickerContainer}>
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={handleDateChange}
-              maximumDate={new Date(2030, 11, 31)}
-              minimumDate={new Date(2020, 0, 1)}
-            />
-          </View>
-        )}
-
         {plans.length > 0 ? (
           <View style={styles.plansContainer}>
             {plans.map((plan, planIndex) => (
@@ -274,38 +259,37 @@ export default function ViewDayScreen({
                 {plan.slots.length > 0 && (
                   <View style={styles.slotsContainer}>
                     {plan.slots.map(item => (
-                      <LinearGradient
-                        key={item.id}
-                        colors={[theme.background, theme.surface]}
-                        style={styles.slotCard}
-                        start={{x: 0, y: 0}}
-                        end={{x: 1, y: 1}}>
-                        <View style={styles.reminderHeaderRow}>
-                          <TouchableOpacity
-                            style={[
-                              styles.reminderCheckboxContainer,
-                              !isToday && styles.checkboxDisabled,
-                            ]}
-                            onPress={() =>
-                              toggleReminder(plan.planId!, item.id)
-                            }
-                            disabled={isUpdating || !isToday}>
+                      <View key={item.id} style={styles.taskCard}>
+                        {/* Main Task Row */}
+                        <TouchableOpacity
+                          style={[
+                            styles.taskRow,
+                            item.completed && styles.taskRowCompleted,
+                            !isToday && styles.taskRowDisabled,
+                          ]}
+                          onPress={() => toggleReminder(plan.planId!, item.id)}
+                          disabled={isUpdating || !isToday}>
+                          {/* Large Checkbox */}
+                          <View style={styles.checkboxWrapper}>
                             <View
                               style={[
-                                styles.reminderCheckbox,
+                                styles.largeCheckbox,
                                 item.completed && styles.checkboxCompleted,
                                 !isToday && styles.checkboxDisabled,
                               ]}>
                               {item.completed && (
-                                <Text style={styles.checkmark}>✓</Text>
+                                <Text style={styles.largeCheckmark}>✓</Text>
                               )}
                             </View>
-                          </TouchableOpacity>
-                          <View style={styles.slotHeader}>
+                          </View>
+
+                          {/* Task Content */}
+                          <View style={styles.taskContent}>
                             <Text
                               style={[
-                                styles.slotTitle,
+                                styles.taskTitle,
                                 item.completed && styles.completedText,
+                                !isToday && styles.textDisabled,
                               ]}>
                               {item.title}
                             </Text>
@@ -321,59 +305,61 @@ export default function ViewDayScreen({
                               </Text>
                             </View>
                           </View>
-                        </View>
+                        </TouchableOpacity>
 
+                        {/* Subgoals */}
                         {item.subgoals.length > 0 && (
                           <View style={styles.subgoalsContainer}>
                             <Text style={styles.subgoalsTitle}>Subgoals</Text>
                             {item.subgoals.map(sg => (
-                              <View key={sg.id} style={styles.subgoalRow}>
-                                <TouchableOpacity
-                                  style={[
-                                    styles.subgoalContent,
-                                    !isToday && styles.subgoalContentDisabled,
-                                  ]}
-                                  onPress={() =>
-                                    toggleSubgoal(plan.planId!, item.id, sg.id)
-                                  }
-                                  disabled={isUpdating || !isToday}>
-                                  <View style={styles.checkboxContainer}>
-                                    <View
-                                      style={[
-                                        styles.checkbox,
-                                        sg.completed &&
-                                          styles.checkboxCompleted,
-                                        !isToday && styles.checkboxDisabled,
-                                      ]}>
-                                      {sg.completed && (
-                                        <Text style={styles.checkmark}>✓</Text>
-                                      )}
-                                    </View>
+                              <TouchableOpacity
+                                key={sg.id}
+                                style={[
+                                  styles.subgoalRow,
+                                  sg.completed && styles.subgoalRowCompleted,
+                                  !isToday && styles.subgoalRowDisabled,
+                                ]}
+                                onPress={() =>
+                                  toggleSubgoal(plan.planId!, item.id, sg.id)
+                                }
+                                disabled={isUpdating || !isToday}>
+                                {/* Subgoal Checkbox */}
+                                <View style={styles.subgoalCheckboxWrapper}>
+                                  <View
+                                    style={[
+                                      styles.subgoalCheckbox,
+                                      sg.completed && styles.checkboxCompleted,
+                                      !isToday && styles.checkboxDisabled,
+                                    ]}>
+                                    {sg.completed && (
+                                      <Text style={styles.subgoalCheckmark}>
+                                        ✓
+                                      </Text>
+                                    )}
                                   </View>
-                                  <View style={styles.subgoalTextContainer}>
-                                    <Text
-                                      style={[
-                                        styles.subgoalText,
-                                        sg.completed && styles.completedText,
-                                        !isToday && styles.subgoalTextDisabled,
-                                      ]}>
-                                      {sg.text}
-                                    </Text>
-                                    <Text
-                                      style={[
-                                        styles.subgoalPriority,
-                                        !isToday &&
-                                          styles.subgoalPriorityDisabled,
-                                      ]}>
+                                </View>
+
+                                {/* Subgoal Content */}
+                                <View style={styles.subgoalContent}>
+                                  <Text
+                                    style={[
+                                      styles.subgoalText,
+                                      sg.completed && styles.completedText,
+                                      !isToday && styles.textDisabled,
+                                    ]}>
+                                    {sg.text}
+                                  </Text>
+                                  <View style={styles.priorityBadge}>
+                                    <Text style={styles.priorityText}>
                                       {sg.priority || 'Medium'}
                                     </Text>
                                   </View>
-                                </TouchableOpacity>
-                              </View>
+                                </View>
+                              </TouchableOpacity>
                             ))}
                           </View>
                         )}
-                      </LinearGradient>
+                      </View>
                     ))}
                   </View>
                 )}
@@ -390,13 +376,14 @@ export default function ViewDayScreen({
           </View>
         )}
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.background,
   },
   loadingContainer: {
     flex: 1,
@@ -416,13 +403,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 16,
-    marginBottom: 20,
-    shadowColor: theme.shadow,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    paddingVertical: 12,
+    marginBottom: 12,
+    backgroundColor: theme.primary,
   },
   navButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.18)',
@@ -442,9 +425,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 10,
     marginHorizontal: 8,
   },
   dayName: {
@@ -477,164 +460,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: theme.textInverse,
-    letterSpacing: -0.5,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: theme.textInverse,
-    marginTop: 4,
-    opacity: 0.9,
-    fontWeight: '600',
-  },
-  slotsContainer: {
-    paddingHorizontal: 16,
-  },
-  slotCard: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    shadowColor: theme.shadow,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: theme.borderLight,
-  },
-  reminderHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  reminderCheckboxContainer: {
-    marginRight: 12,
-  },
-  reminderCheckbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: theme.border,
-    backgroundColor: theme.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  slotHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flex: 1,
-  },
-  slotTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: theme.textPrimary,
-    letterSpacing: -0.3,
-    flex: 1,
-  },
-  timeBadge: {
-    backgroundColor: theme.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  timeText: {
-    color: theme.textInverse,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  subgoalsContainer: {
-    backgroundColor: theme.surfaceVariant,
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-  },
-  subgoalsTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: theme.textPrimary,
-    marginBottom: 12,
-  },
-  subgoalRow: {
-    marginBottom: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  subgoalContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  subgoalTextContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  subgoalPriority: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: theme.textSecondary,
-    textTransform: 'uppercase',
-    backgroundColor: theme.surface,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.borderLight,
-  },
-  // Disabled states for non-today dates
-  subgoalContentDisabled: {
-    opacity: 0.6,
-  },
-  checkboxDisabled: {
-    opacity: 0.5,
-  },
-  subgoalTextDisabled: {
-    opacity: 0.6,
-  },
-  subgoalPriorityDisabled: {
-    opacity: 0.6,
-  },
-  checkboxContainer: {
-    marginRight: 12,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: theme.border,
-    backgroundColor: theme.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxCompleted: {
-    backgroundColor: theme.success,
-    borderColor: theme.success,
-  },
-  checkmark: {
-    color: theme.textInverse,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  subgoalText: {
-    fontSize: 15,
-    color: theme.textPrimary,
-    fontWeight: '500',
-    flex: 1,
-  },
-  completedText: {
-    textDecorationLine: 'line-through',
-    color: theme.textSecondary,
-    opacity: 0.7,
-  },
   plansContainer: {
     padding: 16,
   },
@@ -645,6 +470,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: theme.borderLight,
+    shadowColor: theme.shadow,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   planHeader: {
     marginBottom: 12,
@@ -662,6 +492,167 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.textSecondary,
     fontWeight: '500',
+  },
+  slotsContainer: {
+    gap: 12,
+  },
+  taskCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    shadowColor: '#000000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 8,
+  },
+  taskRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  taskRowCompleted: {
+    backgroundColor: 'rgba(76, 175, 80, 0.05)',
+  },
+  taskRowDisabled: {
+    opacity: 0.6,
+  },
+  checkboxWrapper: {
+    marginRight: 16,
+    padding: 2,
+    borderRadius: 4,
+  },
+  largeCheckbox: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: theme.primary,
+    backgroundColor: theme.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxCompleted: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
+  },
+  checkboxDisabled: {
+    opacity: 0.5,
+  },
+  largeCheckmark: {
+    color: theme.textInverse,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  taskContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  taskTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    flex: 1,
+    marginRight: 12,
+  },
+  timeBadge: {
+    backgroundColor: theme.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  timeText: {
+    color: theme.textInverse,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  subgoalsContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    paddingLeft: 56,
+    borderTopWidth: 1,
+    borderTopColor: theme.borderLight,
+  },
+  subgoalsTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.textPrimary,
+    marginBottom: 8,
+  },
+  subgoalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  subgoalRowCompleted: {
+    backgroundColor: 'rgba(76, 175, 80, 0.05)',
+  },
+  subgoalRowDisabled: {
+    opacity: 0.6,
+  },
+  subgoalCheckboxWrapper: {
+    marginRight: 12,
+    padding: 2,
+    borderRadius: 4,
+  },
+  subgoalCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: theme.primary,
+    backgroundColor: theme.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  subgoalCheckmark: {
+    color: theme.textInverse,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  subgoalContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  subgoalText: {
+    fontSize: 15,
+    color: theme.textPrimary,
+    fontWeight: '500',
+    flex: 1,
+    marginRight: 8,
+  },
+  priorityBadge: {
+    backgroundColor: theme.surfaceVariant,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.borderLight,
+  },
+  priorityText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: theme.textSecondary,
+    textTransform: 'uppercase',
+  },
+  completedText: {
+    textDecorationLine: 'line-through',
+    color: theme.textSecondary,
+    opacity: 0.7,
+  },
+  textDisabled: {
+    opacity: 0.6,
   },
   emptyContainer: {
     alignItems: 'center',
