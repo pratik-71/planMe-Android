@@ -36,16 +36,17 @@ export default function WaterBreaksScreen({onBack}: Props) {
   const [activeTab, setActiveTab] = useState<'schedule' | 'view'>('schedule');
 
   // Schedule Breaks tab state
-  const [breakfast, setBreakfast] = useState('08:00');
-  const [lunch, setLunch] = useState('12:00');
-  const [dinner, setDinner] = useState('19:00');
+  const [breakfast, setBreakfast] = useState('10:00');
+  const [lunch, setLunch] = useState('14:00');
+  const [dinner, setDinner] = useState('21:00');
   const [waterGoalLiters, setWaterGoalLiters] = useState('4');
   const [wakeTime, setWakeTime] = useState('07:00');
   const [sleepTime, setSleepTime] = useState('23:00');
-  const [extraFrom, setExtraFrom] = useState('14:00');
-  const [extraTo, setExtraTo] = useState('15:00');
+  const [extraFrom, setExtraFrom] = useState('16:00');
+  const [extraTo, setExtraTo] = useState('19:00');
   const [perReminderMl, setPerReminderMl] = useState<250 | 500>(250);
   const [useExtraBreak, setUseExtraBreak] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // View Breaks tab state
   const [scheduledBreaks, setScheduledBreaks] = useState<ScheduledBreak[]>([]);
@@ -53,6 +54,7 @@ export default function WaterBreaksScreen({onBack}: Props) {
 
   const [showPicker, setShowPicker] = useState<string | null>(null);
   const [tempDate, setTempDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Load scheduled breaks for View Breaks tab
   const loadScheduledBreaks = async () => {
@@ -112,26 +114,44 @@ export default function WaterBreaksScreen({onBack}: Props) {
     return `${hours}:${minutes}`;
   };
 
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const openPicker = (field: string, currentTime: string) => {
     setTempDate(parseTimeToDate(currentTime));
     setShowPicker(field);
   };
 
-  const handleTimeChange = (event: any, selectedDate?: Date) => {
+  const openDatePicker = () => {
+    setTempDate(selectedDate);
+    setShowDatePicker(true);
+  };
+
+  const handleTimeChange = (event: any, selectedDateTime?: Date) => {
     if (event.type === 'dismissed') {
       setShowPicker(null);
+      setShowDatePicker(false);
       return;
     }
-    if (selectedDate) {
-      const timeStr = formatTime(selectedDate);
-      if (showPicker === 'breakfast') setBreakfast(timeStr);
-      else if (showPicker === 'lunch') setLunch(timeStr);
-      else if (showPicker === 'dinner') setDinner(timeStr);
-      else if (showPicker === 'wake') setWakeTime(timeStr);
-      else if (showPicker === 'sleep') setSleepTime(timeStr);
-      else if (showPicker === 'extraFrom') setExtraFrom(timeStr);
-      else if (showPicker === 'extraTo') setExtraTo(timeStr);
-      setShowPicker(null);
+    if (selectedDateTime) {
+      if (showDatePicker) {
+        setSelectedDate(selectedDateTime);
+        setShowDatePicker(false);
+      } else {
+        const timeStr = formatTime(selectedDateTime);
+        if (showPicker === 'breakfast') setBreakfast(timeStr);
+        else if (showPicker === 'lunch') setLunch(timeStr);
+        else if (showPicker === 'dinner') setDinner(timeStr);
+        else if (showPicker === 'wake') setWakeTime(timeStr);
+        else if (showPicker === 'sleep') setSleepTime(timeStr);
+        else if (showPicker === 'extraFrom') setExtraFrom(timeStr);
+        else if (showPicker === 'extraTo') setExtraTo(timeStr);
+        setShowPicker(null);
+      }
     }
   };
 
@@ -158,13 +178,65 @@ export default function WaterBreaksScreen({onBack}: Props) {
       await initialize();
       await cancelAllWaterNotifications();
 
-      let wakeDate = parseTimeToDate(wakeTime);
-      let sleepDate = parseTimeToDate(sleepTime);
-      const breakfastDate = parseTimeToDate(breakfast);
-      const lunchDate = parseTimeToDate(lunch);
-      const dinnerDate = parseTimeToDate(dinner);
-      const extraFromDate = parseTimeToDate(extraFrom);
-      const extraToDate = parseTimeToDate(extraTo);
+      // Create dates for the selected date
+      const baseDate = new Date(selectedDate);
+      baseDate.setHours(0, 0, 0, 0);
+
+      let wakeDate = new Date(baseDate);
+      wakeDate.setHours(
+        parseInt(wakeTime.split(':')[0], 10),
+        parseInt(wakeTime.split(':')[1], 10),
+        0,
+        0,
+      );
+
+      let sleepDate = new Date(baseDate);
+      sleepDate.setHours(
+        parseInt(sleepTime.split(':')[0], 10),
+        parseInt(sleepTime.split(':')[1], 10),
+        0,
+        0,
+      );
+
+      const breakfastDate = new Date(baseDate);
+      breakfastDate.setHours(
+        parseInt(breakfast.split(':')[0], 10),
+        parseInt(breakfast.split(':')[1], 10),
+        0,
+        0,
+      );
+
+      const lunchDate = new Date(baseDate);
+      lunchDate.setHours(
+        parseInt(lunch.split(':')[0], 10),
+        parseInt(lunch.split(':')[1], 10),
+        0,
+        0,
+      );
+
+      const dinnerDate = new Date(baseDate);
+      dinnerDate.setHours(
+        parseInt(dinner.split(':')[0], 10),
+        parseInt(dinner.split(':')[1], 10),
+        0,
+        0,
+      );
+
+      const extraFromDate = new Date(baseDate);
+      extraFromDate.setHours(
+        parseInt(extraFrom.split(':')[0], 10),
+        parseInt(extraFrom.split(':')[1], 10),
+        0,
+        0,
+      );
+
+      const extraToDate = new Date(baseDate);
+      extraToDate.setHours(
+        parseInt(extraTo.split(':')[0], 10),
+        parseInt(extraTo.split(':')[1], 10),
+        0,
+        0,
+      );
 
       const totalMl = goal * 1000;
       const requiredNotifications = Math.ceil(totalMl / perReminderMl);
@@ -391,6 +463,18 @@ export default function WaterBreaksScreen({onBack}: Props) {
         <ScrollView style={styles.scrollView}>
           <View style={styles.content}>
             <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Schedule Date</Text>
+              <TouchableOpacity
+                style={styles.inputButton}
+                onPress={openDatePicker}>
+                <Text style={styles.inputLabel}>Selected Date</Text>
+                <Text style={styles.inputValue}>
+                  {formatDate(selectedDate)}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.section}>
               <Text style={styles.sectionTitle}>Meal Times</Text>
               <TouchableOpacity
                 style={styles.inputButton}
@@ -557,10 +641,10 @@ export default function WaterBreaksScreen({onBack}: Props) {
         </View>
       )}
 
-      {showPicker && (
+      {(showPicker || showDatePicker) && (
         <DateTimePicker
           value={tempDate}
-          mode="time"
+          mode={showDatePicker ? 'date' : 'time'}
           is24Hour={true}
           display="default"
           onChange={handleTimeChange}

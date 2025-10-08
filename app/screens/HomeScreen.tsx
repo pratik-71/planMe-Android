@@ -1,5 +1,11 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {theme} from '../../stores/ThemeStore';
 
@@ -8,6 +14,8 @@ interface Props {
   onViewDay: () => void;
   onOpenWaterBreaks: () => void;
   onManage: () => void;
+  onOpenProteinTracker?: () => void;
+  onOpenBucketList?: () => void;
 }
 
 export default function HomeScreen({
@@ -15,67 +23,127 @@ export default function HomeScreen({
   onViewDay,
   onOpenWaterBreaks,
   onManage,
+  onOpenProteinTracker,
+  onOpenBucketList,
 }: Props) {
   return (
     <LinearGradient
-      colors={[theme.background, theme.surface, theme.surfaceVariant]}
+      colors={[theme.background, theme.surface]}
       style={styles.container}
       start={{x: 0, y: 0}}
       end={{x: 1, y: 1}}>
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Header Section */}
         <View style={styles.header}>
           <Text style={styles.title}>PlanMe</Text>
-          <Text style={styles.subtitle}>Simple daily planning</Text>
+          <Text style={styles.subtitle}>
+            Your personal productivity companion
+          </Text>
         </View>
 
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={onScheduleDay}>
-            <LinearGradient
-              colors={[theme.primary, theme.accent]}
-              style={styles.primaryButtonGradient}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}>
-              <Text style={styles.primaryButtonText}>Schedule a day</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+        {/* Main Actions Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Daily Planning</Text>
+          <View style={styles.cardRow}>
+            <TouchableOpacity
+              style={styles.primaryCard}
+              onPress={onScheduleDay}>
+              <LinearGradient
+                colors={[theme.primary, theme.accent]}
+                style={styles.cardGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>Schedule Day</Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.secondaryButton} onPress={onViewDay}>
-            <LinearGradient
-              colors={[theme.accent, theme.primary]}
-              style={styles.secondaryButtonGradient}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}>
-              <Text style={styles.secondaryButtonText}>View day</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.secondaryCard} onPress={onViewDay}>
+              <LinearGradient
+                colors={[theme.accent, theme.primary]}
+                style={styles.cardGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>View Day</Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-          <TouchableOpacity
-            style={styles.waterButton}
-            onPress={onOpenWaterBreaks}>
-            <LinearGradient
-              colors={['#4FC3F7', '#0288D1']}
-              style={styles.waterButtonGradient}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}>
-              <Text style={styles.waterButtonText}>Schedule Water Breaks</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+        {/* Health & Wellness Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Health & Wellness</Text>
+          <View style={styles.cardRow}>
+            <TouchableOpacity
+              style={styles.healthCard}
+              onPress={onOpenWaterBreaks}>
+              <LinearGradient
+                colors={['#4FC3F7', '#0288D1']}
+                style={styles.cardGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>Water Breaks</Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.manageButton} onPress={onManage}>
-            <LinearGradient
-              colors={[theme.surfaceVariant, theme.surface]}
-              style={styles.manageButtonGradient}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}>
-              <Text style={styles.manageButtonText}>
-                Manage Templates & Schedules
+            {onOpenProteinTracker && (
+              <TouchableOpacity
+                style={styles.healthCard}
+                onPress={onOpenProteinTracker}>
+                <LinearGradient
+                  colors={['#66BB6A', '#2E7D32']}
+                  style={styles.cardGradient}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 1}}>
+                  <View style={styles.cardContent}>
+                    <Text style={styles.cardTitle}>Protein Tracker</Text>
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {/* Goals & Dreams Section */}
+        {onOpenBucketList && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Goals & Dreams</Text>
+            <TouchableOpacity
+              style={styles.fullWidthCard}
+              onPress={onOpenBucketList}>
+              <LinearGradient
+                colors={['#FF6B35', '#E91E63']}
+                style={styles.cardGradient}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}>
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>Bucket List</Text>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Management Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Management</Text>
+          <TouchableOpacity style={styles.managementCard} onPress={onManage}>
+            <View style={styles.managementCardContent}>
+              <Text style={styles.managementCardTitle}>
+                Templates & Schedules
               </Text>
-            </LinearGradient>
+            </View>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -83,117 +151,126 @@ export default function HomeScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
-  content: {
+  scrollView: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
   },
   header: {
     alignItems: 'center',
     marginBottom: 32,
+    paddingTop: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: '800',
     color: theme.primary,
     textAlign: 'center',
     marginBottom: 8,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: theme.textSecondary,
     textAlign: 'center',
     fontWeight: '500',
+    lineHeight: 22,
   },
-  buttonsContainer: {
-    width: '100%',
-    maxWidth: 320,
+  section: {
+    marginBottom: 32,
   },
-  primaryButton: {
-    borderRadius: 12,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.textPrimary,
     marginBottom: 16,
+    marginLeft: 4,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  primaryCard: {
+    flex: 1,
+    borderRadius: 16,
     shadowColor: theme.primary,
-    shadowOffset: {width: 0, height: 3},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
     overflow: 'hidden',
   },
-  primaryButtonGradient: {
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  secondaryButton: {
-    borderRadius: 12,
+  secondaryCard: {
+    flex: 1,
+    borderRadius: 16,
     shadowColor: theme.accent,
-    shadowOffset: {width: 0, height: 3},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
     overflow: 'hidden',
-    marginBottom: 16,
   },
-  secondaryButtonGradient: {
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  waterButton: {
-    borderRadius: 12,
+  healthCard: {
+    flex: 1,
+    borderRadius: 16,
     shadowColor: '#0288D1',
-    shadowOffset: {width: 0, height: 3},
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
     overflow: 'hidden',
   },
-  waterButtonGradient: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  waterButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  manageButton: {
-    borderRadius: 12,
-    shadowColor: theme.shadow,
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.12,
-    shadowRadius: 3,
-    elevation: 2,
+  fullWidthCard: {
+    borderRadius: 16,
+    shadowColor: '#E91E63',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
     overflow: 'hidden',
-    marginTop: 8,
+  },
+  managementCard: {
+    borderRadius: 16,
+    backgroundColor: theme.surface,
     borderWidth: 1,
     borderColor: theme.borderLight,
+    shadowColor: theme.shadow,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  manageButtonGradient: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+  cardGradient: {
+    padding: 16,
+    minHeight: 80,
+    justifyContent: 'center',
+  },
+  cardContent: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  manageButtonText: {
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
+    textAlign: 'center',
+  },
+  managementCardContent: {
+    padding: 16,
+    minHeight: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  managementCardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
     color: theme.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
+    letterSpacing: -0.3,
+    textAlign: 'center',
   },
 });

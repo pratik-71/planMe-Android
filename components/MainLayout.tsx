@@ -43,14 +43,10 @@ export default function MainLayout({
         </TouchableOpacity>
         <Text style={styles.headerTitle}>PlanMe</Text>
         <View style={styles.streakContainer}>
-          <LinearGradient
-            colors={[theme.streakStart, theme.streakEnd]}
-            style={styles.streakBadge}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}>
+          <View style={styles.streakBadge}>
             <Text style={styles.streakIcon}>🔥</Text>
             <Text style={styles.streakText}>{backendUser?.streak || 0}</Text>
-          </LinearGradient>
+          </View>
         </View>
       </LinearGradient>
       <View style={styles.content}>{children}</View>
@@ -101,23 +97,27 @@ const styles = StyleSheet.create({
   streakBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    shadowColor: theme.streakStart,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1.5,
+    borderColor: theme.streakStart,
+    shadowColor: theme.shadow,
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
   },
   streakIcon: {
-    fontSize: 14,
-    marginRight: 4,
+    fontSize: 8,
+    marginRight: 6,
+    color: theme.streakStart,
   },
   streakText: {
     color: theme.textInverse,
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
   },
   menuIcon: {
     fontSize: 28,

@@ -31,6 +31,9 @@ export default function AlarmScreen({route}: AlarmScreenProps) {
       setCurrentTime(new Date());
     }, 1000);
 
+    // Stop alarm when screen is displayed (when app is open and notification is clicked)
+    handleStopAlarm();
+
     return () => {
       clearInterval(timer);
     };
@@ -59,6 +62,20 @@ export default function AlarmScreen({route}: AlarmScreenProps) {
     navigateToViewDay();
   };
 
+  const handleStopAlarm = () => {
+    try {
+      const {NativeModules, Platform} = require('react-native');
+      if (
+        Platform.OS === 'android' &&
+        NativeModules?.AlarmClockModule?.stopRinging
+      ) {
+        NativeModules.AlarmClockModule.stopRinging();
+      }
+    } catch (error) {
+      console.error('Error stopping alarm:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar hidden />
@@ -80,8 +97,11 @@ export default function AlarmScreen({route}: AlarmScreenProps) {
           </View>
         </View>
 
-        {/* Open App Button */}
+        {/* Action Buttons */}
         <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.stopButton} onPress={handleStopAlarm}>
+            <Text style={styles.buttonText}>Stop Alarm</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.openButton} onPress={handleOpenApp}>
             <Text style={styles.buttonText}>Open App</Text>
           </TouchableOpacity>
@@ -154,15 +174,34 @@ const styles = StyleSheet.create({
   buttonContainer: {
     paddingHorizontal: 40,
     width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 20,
+  },
+  stopButton: {
+    backgroundColor: 'rgba(255, 0, 0, 0.3)',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 0, 0, 0.6)',
+    alignItems: 'center',
+    flex: 1,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   openButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingVertical: 16,
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
     borderRadius: 25,
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.4)',
     alignItems: 'center',
+    flex: 1,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.3,

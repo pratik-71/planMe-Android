@@ -18,6 +18,8 @@ import WaterBreaksScreen from '../app/screens/WaterBreaksScreen';
 import PermissionsScreen from '../app/screens/PermissionsScreen';
 import ManageScreen from '../app/screens/ManageScreen';
 import AnalyticsScreen from '../app/screens/AnalyticsScreen';
+import ProteinTrackerScreen from '../app/screens/ProteinTrackerScreen';
+import BucketListScreen from '../app/screens/BucketListScreen';
 import MainLayout from '../components/MainLayout';
 import {theme} from '../stores/ThemeStore';
 
@@ -29,7 +31,9 @@ export type Route =
   | {name: 'WaterBreaks'}
   | {name: 'Permissions'}
   | {name: 'Manage'}
-  | {name: 'Analytics'};
+  | {name: 'Analytics'}
+  | {name: 'ProteinTracker'}
+  | {name: 'BucketList'};
 
 interface SidebarProps {
   showSidebar: boolean;
@@ -57,17 +61,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         start={{x: 0, y: 0}}
         end={{x: 0, y: 1}}>
         <View style={styles.sidebarHeader}>
-          <LinearGradient
-            colors={[theme.primary, theme.accent]}
-            style={styles.sidebarProfileImage}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}>
+          <View style={styles.sidebarProfileImage}>
             <Text style={styles.sidebarProfileText}>
               {(backendUser?.name || user?.name || user?.email || 'U')
                 .charAt(0)
                 .toUpperCase()}
             </Text>
-          </LinearGradient>
+          </View>
           <Text style={styles.sidebarUserName}>
             {backendUser?.name || user?.name || user?.email || 'User'}
           </Text>
@@ -75,7 +75,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             {backendUser?.email || user?.email || ''}
           </Text>
           <View style={styles.sidebarStreakContainer}>
-            <Text style={styles.sidebarStreakIcon}>🔥</Text>
+            <View style={styles.streakIconContainer}>
+              <Text style={styles.streakIconText}>●</Text>
+            </View>
             <Text style={styles.sidebarStreakText}>
               {backendUser?.streak || 0} Day Streak
             </Text>
@@ -83,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </View>
 
         <View style={styles.sidebarMenu}>
-          <Text style={styles.sidebarMenuTitle}>Menu</Text>
+          <Text style={styles.sidebarMenuTitle}>Navigation</Text>
 
           <TouchableOpacity
             style={styles.sidebarItem}
@@ -92,11 +94,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               setRoute({name: 'Home'});
             }}>
             <View style={styles.sidebarIconWrapper}>
-              <Text style={styles.sidebarIcon}>🏠</Text>
+              <Text style={styles.sidebarIcon}>H</Text>
             </View>
             <View style={styles.sidebarItemContent}>
               <Text style={styles.sidebarItemText}>Home</Text>
-              <Text style={styles.sidebarItemHint}>Main screen</Text>
             </View>
           </TouchableOpacity>
 
@@ -107,11 +108,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               setRoute({name: 'Manage'});
             }}>
             <View style={styles.sidebarIconWrapper}>
-              <Text style={styles.sidebarIcon}>📋</Text>
+              <Text style={styles.sidebarIcon}>M</Text>
             </View>
             <View style={styles.sidebarItemContent}>
               <Text style={styles.sidebarItemText}>Manage</Text>
-              <Text style={styles.sidebarItemHint}>Templates & schedules</Text>
             </View>
           </TouchableOpacity>
 
@@ -122,11 +122,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               setRoute({name: 'Analytics'});
             }}>
             <View style={styles.sidebarIconWrapper}>
-              <Text style={styles.sidebarIcon}>📊</Text>
+              <Text style={styles.sidebarIcon}>A</Text>
             </View>
             <View style={styles.sidebarItemContent}>
               <Text style={styles.sidebarItemText}>Analytics</Text>
-              <Text style={styles.sidebarItemHint}>View your stats</Text>
             </View>
           </TouchableOpacity>
 
@@ -139,7 +138,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               signOut();
             }}>
             <View style={styles.sidebarIconWrapper}>
-              <Text style={styles.sidebarIcon}>🚪</Text>
+              <Text style={styles.sidebarIcon}>S</Text>
             </View>
             <View style={styles.sidebarItemContent}>
               <Text style={[styles.sidebarItemText, styles.signOutText]}>
@@ -355,6 +354,31 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm: _initialAlarm}) => {
     );
   }
 
+  if (route.name === 'ProteinTracker') {
+    return (
+      <View style={styles.container}>
+        <MainLayout
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          backendUser={backendUser}
+          user={user}>
+          <ProteinTrackerScreen
+            onBack={() => setRoute({name: 'Home'})}
+            backendUser={backendUser}
+          />
+        </MainLayout>
+        <Sidebar
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          setRoute={setRoute}
+          signOut={signOut}
+          backendUser={backendUser}
+          user={user}
+        />
+      </View>
+    );
+  }
+
   if (route.name === 'Analytics') {
     return (
       <View style={styles.container}>
@@ -364,6 +388,31 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm: _initialAlarm}) => {
           backendUser={backendUser}
           user={user}>
           <AnalyticsScreen onBack={() => setRoute({name: 'Home'})} />
+        </MainLayout>
+        <Sidebar
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          setRoute={setRoute}
+          signOut={signOut}
+          backendUser={backendUser}
+          user={user}
+        />
+      </View>
+    );
+  }
+
+  if (route.name === 'BucketList') {
+    return (
+      <View style={styles.container}>
+        <MainLayout
+          showSidebar={showSidebar}
+          setShowSidebar={setShowSidebar}
+          backendUser={backendUser}
+          user={user}>
+          <BucketListScreen
+            onBack={() => setRoute({name: 'Home'})}
+            backendUser={backendUser}
+          />
         </MainLayout>
         <Sidebar
           showSidebar={showSidebar}
@@ -407,6 +456,7 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm: _initialAlarm}) => {
               }
               onOpenWaterBreaks={() => setRoute({name: 'WaterBreaks'})}
               onManage={() => setRoute({name: 'Manage'})}
+              onOpenBucketList={() => setRoute({name: 'BucketList'})}
             />
           </MainLayout>
         </View>
@@ -429,6 +479,8 @@ const Navigator: React.FC<NavigatorProps> = ({initialAlarm: _initialAlarm}) => {
           }
           onOpenWaterBreaks={() => setRoute({name: 'WaterBreaks'})}
           onManage={() => setRoute({name: 'Manage'})}
+          onOpenProteinTracker={() => setRoute({name: 'ProteinTracker'})}
+          onOpenBucketList={() => setRoute({name: 'BucketList'})}
         />
       </MainLayout>
       <Sidebar
@@ -517,43 +569,44 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    width: 300,
+    width: 280,
     height: '100%',
-    paddingTop: 50,
-    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingHorizontal: 20,
     shadowColor: theme.shadow,
     shadowOffset: {width: 4, height: 0},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 12,
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 16,
   },
   sidebarHeader: {
     alignItems: 'center',
-    marginBottom: 40,
-    paddingBottom: 24,
+    marginBottom: 32,
+    paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.2)',
+    borderBottomColor: theme.borderLight,
   },
   sidebarProfileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: theme.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
-    shadowColor: theme.shadow,
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    marginBottom: 12,
+    shadowColor: theme.primary,
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   sidebarProfileText: {
-    color: theme.textInverse,
-    fontSize: 32,
+    color: '#FFFFFF',
+    fontSize: 28,
     fontWeight: '700',
   },
   sidebarUserName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: theme.textPrimary,
     textAlign: 'center',
@@ -563,27 +616,35 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.textSecondary,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   sidebarStreakContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 107, 53, 0.15)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 8,
+    backgroundColor: theme.surfaceVariant,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 107, 53, 0.3)',
+    borderColor: theme.borderLight,
   },
-  sidebarStreakIcon: {
-    fontSize: 18,
-    marginRight: 6,
+  streakIconContainer: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: theme.primary,
+    marginRight: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  streakIconText: {
+    fontSize: 4,
+    color: '#FFFFFF',
   },
   sidebarStreakText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: theme.streakStart,
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.textSecondary,
   },
   sidebarMenu: {
     flex: 1,
@@ -592,68 +653,61 @@ const styles = StyleSheet.create({
   sidebarOverlay: {
     position: 'absolute',
     top: 0,
-    left: 300,
+    left: 280,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   sidebarMenuTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
     color: theme.textTertiary,
-    marginBottom: 12,
-    marginTop: 8,
+    marginBottom: 16,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.2,
   },
   sidebarItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 8,
-    backgroundColor: theme.surface,
-    borderWidth: 1,
-    borderColor: theme.borderLight,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 6,
+    backgroundColor: 'transparent',
   },
   sidebarItemContent: {
     flex: 1,
     marginLeft: 12,
   },
   sidebarItemText: {
-    fontSize: 16,
+    fontSize: 15,
     color: theme.textPrimary,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  sidebarItemHint: {
-    fontSize: 12,
-    color: theme.textTertiary,
     fontWeight: '500',
   },
   sidebarIconWrapper: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.primary + '15',
-    borderRadius: 10,
+    backgroundColor: theme.surfaceVariant,
+    borderRadius: 6,
   },
   sidebarIcon: {
-    fontSize: 20,
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.textPrimary,
   },
   sidebarDivider: {
     height: 1,
     backgroundColor: theme.borderLight,
-    marginVertical: 12,
+    marginVertical: 16,
   },
   sidebarSignOut: {
-    backgroundColor: 'rgba(244, 67, 54, 0.08)',
-    borderColor: 'rgba(244, 67, 54, 0.2)',
+    backgroundColor: 'rgba(244, 67, 54, 0.05)',
   },
   signOutText: {
     color: theme.error,
+    fontWeight: '600',
   },
   menuIcon: {
     fontSize: 28,

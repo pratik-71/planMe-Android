@@ -7,6 +7,8 @@ export interface BackendUser {
   name: string;
   email: string;
   id?: number;
+  streak?: number;
+  protein_goal?: number;
 }
 
 export interface UserCheckResponse {
@@ -211,6 +213,154 @@ export class BackendService {
       return await response.json();
     } catch (error) {
       console.error('Error fetching user daily plans:', error);
+      throw error;
+    }
+  }
+
+  static async updateProteinGoal(userId: string, proteinGoal: number) {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/user/${encodeURIComponent(userId)}/protein-goal`,
+        {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({protein_goal: proteinGoal}),
+        },
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating protein goal:', error);
+      throw error;
+    }
+  }
+
+  // ===== Misc (food) =====
+  static async getTodayMisc(userId: string) {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/misc/today/${encodeURIComponent(userId)}`,
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching today misc:', error);
+      throw error;
+    }
+  }
+
+  static async addTodayProtein(userId: string, protein: number) {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/misc/today/${encodeURIComponent(userId)}/protein`,
+        {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({protein}),
+        },
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating today protein:', error);
+      throw error;
+    }
+  }
+
+  static async getProteinHistory(userId: string, days = 10, offsetDays = 0) {
+    try {
+      const url = `${BACKEND_URL}/misc/protein-history/${encodeURIComponent(
+        userId,
+      )}?days=${days}&offsetDays=${offsetDays}`;
+      const response = await fetch(url);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching protein history:', error);
+      throw error;
+    }
+  }
+
+  // ===== Bucket List (JSONB Array of Objects) =====
+  static async getBucketList(userId: string) {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/bucket-list/${encodeURIComponent(userId)}`,
+        {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'},
+        },
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching bucket list:', error);
+      throw error;
+    }
+  }
+
+  static async addBucketListItem(
+    userId: string,
+    title: string,
+    description: string = '',
+  ) {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/bucket-list/${encodeURIComponent(userId)}`,
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({title, description}),
+        },
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding bucket list item:', error);
+      throw error;
+    }
+  }
+
+  static async updateBucketList(userId: string, bucketList: any[]) {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/bucket-list/${encodeURIComponent(userId)}`,
+        {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({bucketList}),
+        },
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating bucket list:', error);
+      throw error;
+    }
+  }
+
+  static async reorderBucketList(userId: string, reorderedItems: any[]) {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/bucket-list/${encodeURIComponent(userId)}/reorder`,
+        {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({reorderedItems}),
+        },
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error reordering bucket list:', error);
       throw error;
     }
   }
